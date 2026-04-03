@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sporpuan - Türkiye'nin Spor Değerlendirme Platformu</title>
+    <meta name="description" content="Sporpuan ile spor tesislerini, markaları ve etkinlikleri değerlendirin. Gerçek kullanıcı yorumlarıyla doğru kararı verin. Türkiye'nin bağımsız spor puanlama platformu.">
+    <meta name="keywords" content="spor tesisi, sporpuan, spor değerlendirme, tesis puanlama, spor markası, spor etkinliği, Türkiye spor">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Sporpuan - Türkiye'nin Spor Değerlendirme Platformu">
+    <meta property="og:description" content="Spor tesislerini, markaları ve etkinlikleri puanlayın, yorumlayın, keşfedin!">
+    <meta property="og:url" content="https://sporpuan.com">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Sporpuan - Puanla, Yorumla, Keşfet!">
+    <meta name="twitter:description" content="Türkiye'nin bağımsız spor değerlendirme platformu.">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="sporpuan_logo_new.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@200;400;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Identity Services (GSI) Client Library -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- PLACE YOUR GOOGLE CLIENT ID HERE -->
+    <meta name="google-signin-client_id" content="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com">
+</head>
+<body>
+    <!-- TOP BANNER (B2B CTA) -->
+    <div class="top-banner" id="top-banner-cta">
+        <div class="app-container top-banner-inner">
+            <span class="tb-text" id="top-banner-text">
+                👉 Markanızı büyütmek ve müşteri yorumları toplamak için <span class="tb-link">buraya tıklayın &rarr;</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="main-header">
+        <div class="header-inner app-container">
+            <div class="logo" id="logo-home">
+                <img src="sporpuan_logo_new.png" alt="Sporpuan Logo" style="height: 48px; width: 48px; object-fit: contain;">
+                <span class="logo-text">Sporpuan</span>
+            </div>
+            <nav class="header-nav" style="justify-content: flex-end; width: 100%;">
+                <div class="header-user" id="open-login-btn" style="position: relative;">
+                    <!-- Logged Out State -->
+                    <div id="user-logged-out" style="display: flex; align-items: center; gap: 0.5rem; color: var(--sporpuan-navy); font-weight: 700;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <span>Giriş Yap / Üye Ol</span>
+                    </div>
+
+                    <!-- Logged In State (Hidden initially) -->
+                    <div id="user-logged-in" style="display: none; align-items: center; gap: 0.8rem;">
+                        <img src="" alt="User Avatar" class="user-avatar" id="avatar-img">
+                        <span class="user-name" id="avatar-name">Kullanıcı</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="user-chevron" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+
+                    <!-- User Profile Dropdown -->
+                    <div class="user-profile-dropdown" id="user-profile-dropdown">
+                        <div class="upd-header">
+                            <img src="" alt="Avatar" class="upd-avatar" id="upd-avatar-img">
+                            <div>
+                                <div class="upd-name" id="upd-name">Kullanıcı</div>
+                                <div class="upd-email" id="upd-email">email@sporpuan.com</div>
+                                <span class="upd-badge">🏆 Sporpuan Üyesi</span>
+                            </div>
+                        </div>
+                        <div class="upd-stats">
+                            <div class="upd-stat">
+                                <h4 id="upd-reviews">0</h4>
+                                <p>Değerlendirme</p>
+                            </div>
+                            <div class="upd-stat">
+                                <h4 id="upd-favs">0</h4>
+                                <p>Favori</p>
+                            </div>
+                            <div class="upd-stat">
+                                <h4 id="upd-score">—</h4>
+                                <p>Ortalama Puan</p>
+                            </div>
+                        </div>
+                        <div class="upd-menu">
+                            <button class="upd-menu-item" id="upd-profile-btn">
+                                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                Profilim
+                            </button>
+                            <button class="upd-menu-item" id="upd-favs-btn">
+                                <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                Favorilerim
+                            </button>
+                            <button class="upd-menu-item" id="upd-reviews-btn">
+                                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                Değerlendirmelerim
+                            </button>
+                            <div class="upd-divider"></div>
+                            <button class="upd-menu-item" id="upd-settings-btn">
+                                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                Ayarlar
+                            </button>
+                            <div class="upd-divider"></div>
+                            <button class="upd-menu-item danger" id="upd-logout-btn">
+                                <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                                Çıkış Yap
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- HOME VIEW -->
+    <div id="home-view" class="home-view-container">
+        <main class="app-container">
+            <!-- HERO SECTION -->
+            <section class="hero-section modern-panoramic">
+                <div class="hero-bg-overlay"></div>
+                
+                <div class="hero-content-inner">
+                    <div class="hero-tag">
+                        <span class="pulse-dot"></span>
+                        Türkiye'nin Spor Değerlendirme Platformu
+                    </div>
+                    
+                    <h1>Puanla, Yorumla, <br> <span class="text-highlight">Keşfet!</span></h1>
+                    <p class="hero-subtext">Tesisler, markalar ve etkinlikler için değerlendirme platformu</p>
+                    
+                    <div class="search-container glass-search">
+                        <div class="search-input-wrapper">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="search-icon" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="text" placeholder="Tesis, marka veya etkinlik ara...">
+                        </div>
+                        <button class="search-btn">Hemen Ara</button>
+                    </div>
+                </div>
+
+                <!-- INTEGRATED RECENT REVIEWS -->
+                <div class="integrated-reviews">
+                    <h3 class="recent-reviews-title">Son Değerlendirmeler</h3>
+                    <div class="recent-reviews-container">
+                        <!-- Review Card 1 -->
+                        <div class="review-card glass-card">
+                            <div class="review-header">
+                                <div class="review-avatar" style="background: var(--sporpuan-green);">MK</div>
+                                <div class="review-meta">
+                                    <span class="review-name">Mert K.</span>
+                                    <span class="review-target">Mars Athletic</span>
+                                </div>
+                                <div class="review-rating-stars">
+                                    8.9 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                                </div>
+                            </div>
+                            <p class="review-text">Havalandırma sistemi çok başarılı, ferah bir ortamda spor.</p>
+                            <div class="review-hover-overlay">
+                                <div class="sporpuan-label">Sporpuan Skoru</div>
+                                <div class="sporpuan-badge">8.9</div>
+                                <div class="rating-bars">
+                                    <div class="rating-bar-item"><span>Temizlik</span><div class="bar-bg"><div class="bar-fill" style="width: 90%"></div></div></div>
+                                    <div class="rating-bar-item"><span>Ekipman</span><div class="bar-bg"><div class="bar-fill" style="width: 85%"></div></div></div>
+                                    <div class="rating-bar-item"><span>Hizmet</span><div class="bar-bg"><div class="bar-fill" style="width: 92%"></div></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Review Card 2 -->
+                        <div class="review-card glass-card">
+                            <div class="review-header">
+                                <div class="review-avatar" style="background: #f39c12;">LK</div>
+                                <div class="review-meta">
+                                    <span class="review-name">Leyla K.</span>
+                                    <span class="review-target">Nilüfer Havuzu</span>
+                                </div>
+                                <div class="review-rating-stars">
+                                    9.2 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                                </div>
+                            </div>
+                            <p class="review-text">Bursa'daki en hijyenik havuz diyebilirim. Personel çok ilgili.</p>
+                            <div class="review-hover-overlay">
+                                <div class="sporpuan-label">Sporpuan Skoru</div>
+                                <div class="sporpuan-badge">9.2</div>
+                                <div class="rating-bars">
+                                    <div class="rating-bar-item"><span>Hijyen</span><div class="bar-bg"><div class="bar-fill" style="width: 95%"></div></div></div>
+                                    <div class="rating-bar-item"><span>Personel</span><div class="bar-bg"><div class="bar-fill" style="width: 90%"></div></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Review Card 3 -->
+                        <div class="review-card glass-card">
+                            <div class="review-header">
+                                <div class="review-avatar" style="background: #3498db;">CT</div>
+                                <div class="review-meta">
+                                    <span class="review-name">Can T.</span>
+                                    <span class="review-target">Nike Vaporfly 3</span>
+                                </div>
+                                <div class="review-rating-stars">
+                                    9.8 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                                </div>
+                            </div>
+                            <p class="review-text">Maraton hazırlığı için aldım, enerji geri dönüşü inanılmaz.</p>
+                            <div class="review-hover-overlay">
+                                <div class="sporpuan-label">Sporpuan Skoru</div>
+                                <div class="sporpuan-badge">9.8</div>
+                                <div class="rating-bars">
+                                    <div class="rating-bar-item"><span>Kalite</span><div class="bar-bg"><div class="bar-fill" style="width: 100%"></div></div></div>
+                                    <div class="rating-bar-item"><span>Performans</span><div class="bar-bg"><div class="bar-fill" style="width: 96%"></div></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Review Card 4 -->
+                        <div class="review-card glass-card">
+                            <div class="review-header">
+                                <div class="review-avatar" style="background: #e74c3c;">SO</div>
+                                <div class="review-meta">
+                                    <span class="review-name">Selin O.</span>
+                                    <span class="review-target">Bisiklet Festivali</span>
+                                </div>
+                                <div class="review-rating-stars">
+                                    9.0 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                                </div>
+                            </div>
+                            <p class="review-text">Organizasyon çok keyifliydi. Sporpuan üzerinden keşfetmem harika.</p>
+                            <div class="review-hover-overlay">
+                                <div class="sporpuan-label">Sporpuan Skoru</div>
+                                <div class="sporpuan-badge">9.0</div>
+                                <div class="rating-bars">
+                                    <div class="rating-bar-item"><span>Organizasyon</span><div class="bar-bg"><div class="bar-fill" style="width: 85%"></div></div></div>
+                                    <div class="rating-bar-item"><span>Deneyim</span><div class="bar-bg"><div class="bar-fill" style="width: 95%"></div></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+</div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </section>
+        </main>
+    </div>
+
+    <!-- EXPLORE VIEW -->
+    <div id="explore-view" style="display: none;">
+        <main class="app-container">
+            <!-- MINIMAL EXPLORE HEADER (Replaces Banner) -->
+            <header class="explore-minimal-header">
+                <h1>Spor Dünyasını <span class="text-highlight">Keşfet</span></h1>
+                <p>Türkiye'nin en kapsamlı spor platformunda binlerce tesis, marka ve etkinliği inceleyin.</p>
+            </header>
+
+
+                <!-- Sağ Sonuç Alanı -->
+                <div class="explore-results">
+                    <div class="results-header">
+                        <div class="results-info">
+                            <span id="results-count">0</span> sonuç listeleniyor
+                        </div>
+                        <div class="results-sort">
+                            <select id="sort-results" class="sidebar-select sm">
+                                <option value="score">En Yüksek Puan</option>
+                                <option value="reviews">En Çok Yorum</option>
+                                <option value="newest">En Yeni</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <section class="facilities-section">
+                        <div class="loader" id="loader"></div>
+                        <div class="error-msg" id="error-msg" style="display: none;"></div>
+                        
+                        <div class="list-container grid-layout" id="facilities-list">
+                            <!-- Injected via JS -->
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- DETAILS FULL PAGE VIEW -->
+    <div id="details-view" style="display: none;">
+        <!-- Injected via JS -->
+    </div>
+
+    <!-- PROFILE DASHBOARD VIEW -->
+    <div id="profile-view" style="display: none;">
+        <main class="profile-dashboard app-container">
+            <aside class="profile-sidebar">
+                <div class="ps-user-card">
+                    <div class="ps-avatar-wrap">
+                        <img src="" id="prof-avatar-img" alt="User">
+                        <button class="edit-avatar"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></button>
+                    </div>
+                    <h2 id="prof-name">Kullanıcı Adı</h2>
+                    <p id="prof-email">email@sporpuan.com</p>
+                    <div class="ps-badges" id="prof-badges"></div>
+                </div>
+                <nav class="ps-nav">
+                    <button class="ps-nav-item active" data-view="overview"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg> Genel Bakış</button>
+                    <button class="ps-nav-item" data-view="reviews"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Değerlendirmelerim</button>
+                    <button class="ps-nav-item" data-view="favorites"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Favorilerim</button>
+                    <button class="ps-nav-item" data-view="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> Ayarlar</button>
+                    <button class="ps-nav-item logout" id="prof-logout-btn"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> Çıkış Yap</button>
+                </nav>
+            </aside>
+            <div class="profile-content">
+                <!-- OVERVIEW -->
+                <div id="prof-overview-sect" class="prof-sect active">
+                    <div class="prof-welcome">
+                        <h1>Hoş Geldin, <span id="prof-fname">Kullanıcı</span> 👋</h1>
+                        <p>Spor yolculuğuna ve topluluğa katkılarına göz at.</p>
+                    </div>
+                    <div class="prof-stats-grid">
+                        <div class="prof-stat-card"><span class="stat-count" id="stat-total-reviews">0</span><span class="stat-label">Değerlendirme</span></div>
+                        <div class="prof-stat-card"><span class="stat-count" id="stat-avg-score">0.0</span><span class="stat-label">Ort. Puan</span></div>
+                        <div class="prof-stat-card"><span class="stat-count" id="stat-favs-count">0</span><span class="stat-label">Favori</span></div>
+                        <div class="prof-stat-card"><span class="stat-count" id="stat-rank">#—</span><span class="stat-label">Sıralama</span></div>
+                    </div>
+                    <div class="prof-recent-activity">
+                        <h3>Son Değerlendirmelerim</h3>
+                        <div id="prof-reviews-list-compact" class="activity-list"></div>
+                    </div>
+                </div>
+
+                <!-- REVIEWS TAB -->
+                <div id="prof-reviews-sect" class="prof-sect">
+                    <div class="prof-sect-header">
+                        <h2>Değerlendirmelerim</h2>
+                        <p>Tüm değerlendirme geçmişinizi buradan takip edebilirsiniz.</p>
+                    </div>
+                    <div id="prof-full-reviews-list" class="prof-reviews-full"></div>
+                </div>
+
+                <!-- FAVORITES TAB -->
+                <div id="prof-favorites-sect" class="prof-sect">
+                    <div class="prof-sect-header">
+                        <h2>Favorilerim</h2>
+                        <p>Beğendiğiniz mekanları burada saklayın.</p>
+                    </div>
+                    <div id="prof-favorites-grid" class="prof-fav-grid"></div>
+                </div>
+
+                <!-- SETTINGS TAB -->
+                <div id="prof-settings-sect" class="prof-sect">
+                    <div class="prof-sect-header">
+                        <h2>Hesap Ayarları</h2>
+                        <p>Profil bilgilerinizi ve tercihlerinizi güncelleyin.</p>
+                    </div>
+                    <form id="settings-form" class="settings-form">
+                        <div class="settings-group">
+                            <h4>Kişisel Bilgiler</h4>
+                            <div class="settings-row">
+                                <div class="floating-input"><input type="text" id="set-name" placeholder=" "><label for="set-name">Ad Soyad</label></div>
+                                <div class="floating-input"><input type="email" id="set-email" placeholder=" "><label for="set-email">E-posta</label></div>
+                            </div>
+                            <div class="settings-row">
+                                <div class="floating-input"><input type="tel" id="set-phone" placeholder=" "><label for="set-phone">Telefon</label></div>
+                                <div class="floating-input"><input type="text" id="set-city" placeholder=" "><label for="set-city">Şehir</label></div>
+                            </div>
+                        </div>
+                        <div class="settings-group">
+                            <h4>Şifre Değiştir</h4>
+                            <div class="settings-row">
+                                <div class="floating-input"><input type="password" id="set-old-pass" placeholder=" "><label for="set-old-pass">Mevcut Şifre</label></div>
+                                <div class="floating-input"><input type="password" id="set-new-pass" placeholder=" "><label for="set-new-pass">Yeni Şifre</label></div>
+                            </div>
+                        </div>
+                        <div class="settings-group">
+                            <h4>Bildirim Tercihleri</h4>
+                            <div class="settings-toggles">
+                                <label class="toggle-row"><input type="checkbox" checked><span class="toggle-slider"></span> E-posta bildirimleri</label>
+                                <label class="toggle-row"><input type="checkbox" checked><span class="toggle-slider"></span> Yeni değerlendirme bildirimleri</label>
+                                <label class="toggle-row"><input type="checkbox"><span class="toggle-slider"></span> Haftalık özet e-postası</label>
+                            </div>
+                        </div>
+                        <div class="settings-actions">
+                            <button type="submit" class="auth-submit-btn">Değişiklikleri Kaydet <span class="arrow">&rarr;</span></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+
+    <!-- Auth Modal (Modern Redesign) -->
+    <div class="modal-overlay" id="login-modal">
+        <div class="modal-content auth-modern">
+            <button class="close-btn" id="close-login-btn">&times;</button>
+            <div class="auth-left-brand">
+                <div class="alb-content">
+                    <img src="sporpuan_logo_new.png" alt="Sporpuan" class="alb-logo">
+                    <p>Puanlayın, yorumlayın ve binlerce spor tutkunuyla deneyiminizi paylaşın.</p>
+                </div>
+            </div>
+            <div class="auth-right-form">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-target="login-form-wrapper">Giriş Yap</button>
+                    <button class="auth-tab" data-target="register-form-wrapper">Kayıt Ol</button>
+                    <div class="auth-tab-indicator"></div>
+                </div>
+                
+                <div id="login-form-wrapper" class="auth-form-wrapper active">
+                    <div class="auth-intro">
+                        <h3>Tekrar Hoş Geldiniz!</h3>
+                        <p>Hesabınıza giriş yaparak devam edin.</p>
+                    </div>
+                    <form id="login-form" class="modern-form">
+                        <div class="floating-input">
+                            <input type="email" id="login-email" required placeholder=" ">
+                            <label for="login-email">E-posta Adresi</label>
+                            <svg class="input-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        </div>
+                        <div class="floating-input">
+                            <input type="password" id="login-pass" required placeholder=" ">
+                            <label for="login-pass">Şifre</label>
+                            <svg class="input-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        </div>
+                        <div class="auth-extra">
+                            <label class="check-container">Beni Hatırla<input type="checkbox"><span class="checkmark"></span></label>
+                            <a href="#" class="forgot-link">Şifremi Unuttum</a>
+                        </div>
+                        <button type="submit" class="auth-submit-btn">Giriş Yap <span class="arrow">&rarr;</span></button>
+                    </form>
+                </div>
+
+                <div id="register-form-wrapper" class="auth-form-wrapper">
+                    <div class="auth-intro">
+                        <h3>Aramıza Katılın!</h3>
+                        <p>Profilinizi oluşturun ve puanlamaya başlayın.</p>
+                    </div>
+                    <form id="register-form" class="modern-form">
+                        <div class="floating-input">
+                            <input type="text" id="reg-name" required placeholder=" ">
+                            <label for="reg-name">Ad Soyad</label>
+                        </div>
+                        <div class="floating-input">
+                            <input type="email" id="reg-email" required placeholder=" ">
+                            <label for="reg-email">E-posta Adresi</label>
+                        </div>
+                        <div class="floating-input">
+                            <input type="password" id="reg-pass" required placeholder=" ">
+                            <label for="reg-pass">Şifre</label>
+                        </div>
+                        <div class="auth-policy">
+                            <p>Devam ederek <a href="#">Kullanım Koşulları</a>'nı kabul etmiş sayılırsınız.</p>
+                        </div>
+                        <button type="submit" class="auth-submit-btn">Kayıt Ol <span class="arrow">&rarr;</span></button>
+                    </form>
+                </div>
+
+                <div class="auth-social-wrap">
+                    <span class="social-label">veya şununla devam edin</span>
+                    <div class="social-btns">
+                        <button class="social-btn"><img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google"></button>
+                        <button class="social-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z"/></svg></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Partner Modal -->
+    <div class="modal-overlay" id="partner-modal">
+        <div class="modal-content auth-card partner-auth">
+            <button class="close-btn" id="close-partner-btn">&times;</button>
+            <div class="auth-header">
+                <div class="logo">
+                    <img src="sporpuan_logo_new.png" alt="Sporpuan Logo" style="height: 52px; width: 52px; object-fit: contain;">
+                    <span class="logo-text">Sporpuan</span>
+                </div>
+                <h3>Partner Portalı</h3>
+                <p>Mekanınızı veya markanızı yönetin</p>
+            </div>
+            <div class="auth-tabs">
+                <div class="auth-tab-indicator"></div>
+                <button class="auth-tab active" data-target="partner-login-wrapper">Giriş Yap</button>
+                <button class="auth-tab" data-target="partner-register-wrapper">Kayıt Ol</button>
+            </div>
+            
+            <div id="partner-login-wrapper" class="auth-form-wrapper active">
+                <div class="auth-intro" style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.5rem; color: var(--sporpuan-navy); margin-bottom: 0.5rem;">Hoş Geldiniz</h3>
+                    <p style="color: var(--text-muted); font-weight: 600;">Online itibarınızı kolaylıkla yönetin</p>
+                </div>
+                <form id="partner-login-form">
+                    <div class="input-group">
+                        <label>Kurumsal E-posta</label>
+                        <input type="email" placeholder="partner@firma.com" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Şifre</label>
+                        <input type="password" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="primary-btn partner-btn">Partner Girişi</button>
+                </form>
+            </div>
+
+            <div id="partner-register-wrapper" class="auth-form-wrapper" style="display: none;">
+                <form id="partner-register-form">
+                    <div class="input-group">
+                        <label>Organizasyon Adı</label>
+                        <input type="text" placeholder="Örn: Bursa Tenis Kulübü" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Yetkili Ad Soyad</label>
+                        <input type="text" placeholder="Adınız Soyadınız" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Kurumsal E-posta</label>
+                        <input type="email" placeholder="iletisim@firma.com" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Telefon</label>
+                        <input type="tel" placeholder="02XX XXX XX XX" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Şifre</label>
+                        <input type="password" placeholder="••••••••" required>
+                    </div>
+                    <div class="auth-options" style="margin-bottom: 1rem; flex-direction: column; align-items: flex-start; gap: 12px;">
+                        <label class="remember-me" style="font-size: 0.85rem; line-height: 1.4;">
+                            <input type="checkbox" required style="width: 18px; height: 18px; margin-right: 8px;"> 
+                            <a href="#" style="color:var(--sporpuan-green); text-decoration: underline;">Kullanım Koşulları</a> ve <a href="#" style="color:var(--sporpuan-green); text-decoration: underline;">Partner Sözleşmesi</a>'ni okudum, onaylıyorum.
+                        </label>
+                        <label class="remember-me" style="font-size: 0.85rem; line-height: 1.4;">
+                            <input type="checkbox" required style="width: 18px; height: 18px; margin-right: 8px;"> 
+                            Kişisel verilerimin işlenmesine ilişkin <a href="#" style="color:var(--sporpuan-green); text-decoration: underline;">KVKK Aydınlatma Metni</a>'ni okudum.
+                        </label>
+                        <label class="remember-me" style="font-size: 0.85rem; line-height: 1.4;">
+                            <input type="checkbox" style="width: 18px; height: 18px; margin-right: 8px;"> 
+                            Kampanya ve duyurulardan haberdar olmak için ticari elektronik ileti almayı kabul ediyorum.
+                        </label>
+                    </div>
+                    <button type="submit" class="primary-btn partner-btn">Partner Kaydı Oluştur</button>
+                </form>
+            </div>
+            
+            <div class="auth-footer-info">
+                <p>Kaydolarak <a href="#">Partner Kullanım Koşulları</a>'nı kabul etmiş sayılırsınız.</p>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+    <!-- ADMIN VIEW -->
+    <div id="admin-view" style="display: none;">
+        <main class="app-container">
+            <div class="admin-dashboard animate-in">
+                <div class="admin-header-new">
+                    <div class="admin-stats-row">
+                        <div class="stat-card-new">
+                            <div class="sn-icon" style="background: rgba(30, 64, 175, 0.1); color: #1e40af;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            </div>
+                            <div class="sn-info">
+                                <h2 id="adm-total-users">7</h2>
+                                <p>Toplam Kullanıcı</p>
+                            </div>
+                        </div>
+                        <div class="stat-card-new">
+                            <div class="sn-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/><path d="M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4"/></svg>
+                            </div>
+                            <div class="sn-info">
+                                <h2 id="adm-total-partners">0</h2>
+                                <p>Tesis Yöneticisi</p>
+                            </div>
+                        </div>
+                        <div class="stat-card-new">
+                            <div class="sn-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            </div>
+                            <div class="sn-info">
+                                <h2 id="adm-complaints">0</h2>
+                                <p>Yorum Şikayeti</p>
+                            </div>
+                        </div>
+                        <div class="stat-card-new">
+                            <div class="sn-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                            </div>
+                            <div class="sn-info">
+                                <h2 id="adm-pending-comments">6</h2>
+                                <p>Bekleyen Yorum</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <nav class="admin-nav-tabs">
+                    <button class="nav-tab active">Kullanıcılar</button>
+                    <button class="nav-tab">Yorumlar</button>
+                    <button class="nav-tab">Geri Alma Talepleri</button>
+                    <button class="nav-tab">Yorum Şikayetleri</button>
+                    <button class="nav-tab">Tesisler</button>
+                    <button class="nav-tab">Abonelikler</button>
+                    <button class="nav-tab">Etkinlikler</button>
+                    <button class="nav-tab">Markalar</button>
+                </nav>
+
+                <div class="admin-content-card">
+                    <div class="ac-header">
+                        <h3>Kullanıcı Yönetimi</h3>
+                        <button class="purple-btn">+ Kullanıcı Davet Et</button>
+                    </div>
+                    
+                    <div class="ac-filters">
+                        <button class="filter-btn active">Tümü (7)</button>
+                        <button class="filter-btn">Adminler (1)</button>
+                        <button class="filter-btn">Tesis Yöneticileri (0)</button>
+                    </div>
+
+                    <div class="ac-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Ad Soyad</th>
+                                    <th>E-posta</th>
+                                    <th>Rol</th>
+                                    <th>Kayıt Tarihi</th>
+                                    <th>Tesisleri</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-user-table-body">
+                                <!-- Dynamic Content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- INVITE MODAL -->
+    <div id="invite-modal" class="modal">
+        <div class="modal-content animate-in">
+            <button class="close-modal" id="close-invite-btn">&times;</button>
+            <h2>Kullanıcı Davet Et</h2>
+            <p>Yeni bir kullanıcıya davet e-postası göndererek sisteme dahil edin.</p>
+            <form id="invite-form" class="invite-form">
+                <input type="email" placeholder="E-posta Adresi" required>
+                <button type="submit">Davetiye Gönder</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PARTNER DASHBOARD VIEW -->
+    <div id="partner-dashboard-view" style="display: none;">
+        <main class="app-container">
+            <div class="partner-dashboard animate-in">
+                <div class="pd-header">
+                    <div class="pd-welcome">
+                        <h1>Kontrol Paneli</h1>
+                        <p>Tekrar hoş geldiniz! <span id="pd-company-name">IGU SPOR KULUBU</span> performansına göz atın.</p>
+                    </div>
+                    <div class="pd-actions">
+                        <button class="outline-btn">Sertifikamı Görüntüle</button>
+                        <button class="outline-btn">Rapor Al</button>
+                        <button class="dark-btn">Profili Gör</button>
+                    </div>
+                </div>
+
+                <div class="pd-stats-row">
+                    <div class="pd-stat-mini">
+                        <div class="pdm-icon" style="background: rgba(244, 63, 94, 0.1); color: #f43f5e;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 6l-9.5 9.5-5-5L1 18"></path><polyline points="17 6 23 6 23 12"></polyline></svg>
+                        </div>
+                        <h3 id="pds-score">0.0</h3>
+                        <p>Sporpuan Skoru</p>
+                    </div>
+                    <div class="pd-stat-mini">
+                        <div class="pdm-icon" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        </div>
+                        <h3 id="pds-total">0</h3>
+                        <p>Toplam Yorum</p>
+                    </div>
+                    <div class="pd-stat-mini">
+                        <div class="pdm-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                        <h3 id="pds-approved">0</h3>
+                        <p>Onaylı Yorumlar</p>
+                    </div>
+                    <div class="pd-stat-mini">
+                        <div class="pdm-icon" style="background: rgba(244, 63, 94, 0.1); color: #f43f5e;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        </div>
+                        <h3 id="pds-favs">0</h3>
+                        <p>Favori Sayısı</p>
+                    </div>
+                    <div class="pd-stat-mini">
+                        <div class="pdm-icon" style="background: rgba(168, 85, 247, 0.1); color: #a855f7;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                        </div>
+                        <h3 id="pds-badge">Yok</h3>
+                        <p>Rozet Seviyesi</p>
+                    </div>
+                </div>
+
+                <div class="pd-bottom-grid">
+                    <div class="pd-card pd-info-card">
+                        <div class="pdc-header">
+                            <h3><span class="icon">✎</span> Tesis Bilgileri</h3>
+                            <button class="edit-btn">Düzenle</button>
+                        </div>
+                        <div class="pdc-content">
+                            <div class="pd-field">
+                                <label>Tesis Adı</label>
+                                <p id="pdf-company">IGU SPOR KULUBU</p>
+                            </div>
+                            <div class="pd-field">
+                                <label>Telefon</label>
+                                <p id="pdf-phone">05387644509</p>
+                            </div>
+                            <div class="pd-field">
+                                <label>E-posta</label>
+                                <p id="pdf-email">selmanutkumarmara@gmail.com</p>
+                            </div>
+                            <div class="pd-field">
+                                <label>Web Sitesi</label>
+                                <p id="pdf-website">sporsepeti.com.tr</p>
+                            </div>
+                            <div class="pd-field full">
+                                <label>Açıklama</label>
+                                <p id="pdf-bio">wwdwd</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pd-card pd-qr-card">
+                        <div class="pdc-header">
+                            <h3><span class="icon">▣</span> QR Kod</h3>
+                        </div>
+                        <div class="pd-qr-content">
+                            <div class="qr-placeholder">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=sporpuan.com/tesis/igu-spor-kulubu" alt="QR Code">
+                            </div>
+                            <p>Müşterileriniz bu kodu tarayarak yorum bırakabilir</p>
+                            <button class="link-btn"><span class="icon">🔗</span> Yorum Linkini Kopyala</button>
+                            <button class="gradient-btn"><span class="icon">⭳</span> QR Sticker'ı İndir</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+    <!-- ==================== B2B LANDING PAGE (Kurumsal Çözümler) ==================== -->
+    <div id="b2b-view" style="display: none;">
+        <main class="b2b-main">
+            <!-- B2B Hero -->
+            <section class="b2b-hero-new">
+                <div class="b2b-hero-slider">
+                    <div class="b2b-hero-slide active" style="background-image: linear-gradient(to right, #0f172a 40%, rgba(15, 23, 42, 0.4) 100%), url('https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=2070&auto=format&fit=crop');"></div>
+                    <div class="b2b-hero-slide" style="background-image: linear-gradient(to right, #0f172a 40%, rgba(15, 23, 42, 0.4) 100%), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop');"></div>
+                    <div class="b2b-hero-slide" style="background-image: linear-gradient(to right, #0f172a 40%, rgba(15, 23, 42, 0.4) 100%), url('https://images.unsplash.com/photo-1552674605-db6ffd4facb5?q=80&w=2070&auto=format&fit=crop');"></div>
+                </div>
+                <div class="b2b-hero-overlay"></div>
+                <div class="app-container">
+                    <div class="b2b-hero-inner">
+                        <div class="b2b-badge">Kurumsal Partnerlik</div>
+                        <h1>Markanızı ve Organizasyonunuzu Büyütün <br> <span class="text-highlight">İtibarınızı Artırın</span></h1>
+                        <p>Türkiye'nin lider sporcu topluluğuna katılın. <br> <span class="logo-text" style="font-size: inherit; color: inherit; font-weight: 200;">Sporpuan</span> ile güven inşa edin ve yeni sporcular kazanın.</p>
+                        <div class="b2b-hero-actions">
+                            <button class="b2b-cta-main" onclick="document.getElementById('partner-modal').classList.add('active');">Partner Ol</button>
+                            <button class="b2b-cta-ghost" id="b2b-scroll-details">Çözümleri Keşfet</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Neden Sporpuan? -->
+            <section class="b2b-features-section">
+                <div class="app-container">
+                    <div class="b2b-section-header">
+                        <h2>Neden Sporpuan Partneri Olmalısınız?</h2>
+                        <p>Sporpuan, organizasyonunuzun etkisini artıran ve sporcu sadakatini güçlendiren bir büyüme ekosistemidir.</p>
+                    </div>
+                    <div class="b2b-features-grid">
+                        <div class="b2b-feature-card">
+                            <div class="b2b-f-number">01</div>
+                            <h3>Marka Bilinirliği</h3>
+                            <p>Etkinlikleriniz ve organizasyonunuzla binlerce aktif sporcunun radarında en üst sırada yer alın.</p>
+                        </div>
+                        <div class="b2b-feature-card">
+                            <div class="b2b-f-number">02</div>
+                            <h3>Sosyal Kanıt ve Güven</h3>
+                            <p>Sporcuların gerçek yorumları ve şeffaf tavsiye oranları ile güvenilirliğinizi sayılarla kanıtlayın.</p>
+                        </div>
+                        <div class="b2b-feature-card">
+                            <div class="b2b-f-number">03</div>
+                            <h3>Performans Analitiği</h3>
+                            <p>Organizasyonunuza dair detaylı sporcu geri bildirimlerini modern veri panellerinde analiz edin.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sporpuan Skoru Bilgilendirme -->
+            <section class="b2b-score-info">
+                <div class="app-container">
+                    <div class="b2b-score-grid">
+                        <div class="b2b-score-text">
+                            <span class="slide-badge">Şeffaf Değerlendirme</span>
+                            <h2>Sporpuan Skoru <br><span class="text-highlight">10'luk Sistemle</span> Netleşir</h2>
+                            <p>Sporpuan Skoru, organizasyonunuzun 5 ana kriterde sporcular tarafından 10 üzerinden puanlanmasıyla oluşur.</p>
+                            
+                            <div class="b2b-metric-display">
+                                <div class="metric-item">
+                                    <span class="m-val">9.2</span>
+                                    <span class="m-lbl">Genel Puan</span>
+                                </div>
+                                <div class="metric-item highlight">
+                                    <span class="m-val">%96</span>
+                                    <span class="m-lbl">Tavsiye Etme Oranı</span>
+                                </div>
+                            </div>
+
+                            <p class="b2b-metric-desc">Sporcuların <strong>tavsiye etme oranı</strong>, organizasyonunuzun organik büyümesi için en kritik metriklerden biridir.</p>
+                        </div>
+                        <div class="b2b-score-visual">
+                            <div class="mockup-score-card">
+                                <div class="mockup-header">
+                                    <div class="mockup-avatar" style="background: #fbbf24;">I</div>
+                                    <div class="mockup-name">Illinois Marathon 2026</div>
+                                    <div class="mockup-recomm">⭐ %94 Tavsiye</div>
+                                </div>
+                                <div class="mockup-main-score">9.4<span>/10</span></div>
+                                <div class="mockup-bars">
+                                    <div class="m-bar"><label>Organizasyon</label> <div class="m-progress"><div class="m-fill" style="width: 96%;"></div></div> <span>9.6</span></div>
+                                    <div class="m-bar"><label>Atmosfer</label> <div class="m-progress"><div class="m-fill" style="width: 94%;"></div></div> <span>9.4</span></div>
+                                    <div class="m-bar"><label>Hizmet</label> <div class="m-progress"><div class="m-fill" style="width: 90%;"></div></div> <span>9.0</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Trust & Data Visual Section -->
+            <section class="b2b-testimonial-collage">
+                <div class="app-container">
+                    <div class="trust-visual-wrapper">
+                        <div class="trust-main-img-container">
+                            <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200&fit=crop" alt="Sporpuan Partner Center">
+                        </div>
+                        
+                        <!-- Left Card -->
+                        <div class="trust-card experience">
+                            <h4>Mükemmel Deneyim!</h4>
+                            <p>Eğitmenler çok profesyonel ve tesis son derece temiz. Kesinlikle tavsiye ederim.</p>
+                            <div class="tavsiye">
+                                <span>S*** K***</span>
+                                <span>%95 Tavsiye</span>
+                            </div>
+                        </div>
+
+                        <!-- Top Right Card -->
+                        <div class="trust-card quote">
+                            <div class="stars">★★★★★</div>
+                            <p>"Harika tesis!"</p>
+                        </div>
+
+                        <!-- Bottom Card -->
+                        <div class="trust-card stat">
+                            <div class="stat-icon" style="font-size: 1.5rem;">👍</div>
+                            <div class="stat-info">
+                                <h4 style="margin-bottom: 0;">2,450+</h4>
+                                <span style="font-size: 0.8rem; color: #64748b;">Değerlendirme</span>
+                            </div>
+                        </div>
+
+                        <!-- Decorative Badges -->
+                        <div class="trust-badge-float blue">🏆</div>
+                        <div class="trust-badge-float teal">🏅</div>
+                        <div class="trust-badge-float orange">⭐</div>
+                        <div class="trust-badge-float" style="right: 15%; top: 60%; background: none; font-size: 2rem;">🎾</div>
+                        <div class="trust-badge-float" style="right: 10%; top: 50%; background: none; font-size: 2.2rem;">💪</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Çözümlerimiz -->
+            <section class="b2b-solutions-section">
+                <div class="app-container">
+                    <div class="b2b-solutions-grid">
+                        <div class="b2b-sol-image">
+                            <img src="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800&fit=crop" alt="Spor Organizasyonu">
+                        </div>
+                        <div class="b2b-sol-content">
+                            <h2>Her Türlü <br><span class="text-highlight">Spor Organizasyonu</span> İçin</h2>
+                            <div class="b2b-sol-list">
+                                <div class="b2b-sol-item">
+                                    <h4>Kulüpler ve Tesisler</h4>
+                                    <p>Üyelerinize en iyi deneyimi sunmak için geri bildirimleri kullanın.</p>
+                                </div>
+                                <div class="b2b-sol-item">
+                                    <h4>Yarış ve Etkinlikler</h4>
+                                    <p>Maraton, bisiklet veya yüzme yarışlarınız için sosyal kanıt oluşturun.</p>
+                                </div>
+                                <div class="b2b-sol-item">
+                                    <h4>Spor Akademileri</h4>
+                                    <p>Eğitim kalitenizi sporcu ailelerine ve topluluğa gösterin.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Temsili İnceleme Özizleme -->
+            <section class="b2b-preview-section">
+                <div class="app-container">
+                    <div class="b2b-section-header">
+                        <h2>Sayfanız Nasıl Görünecek?</h2>
+                        <p>Sporcuların organizasyonunuz hakkında yaptığı profesyonel yorumlar, sizi rakiplerinizden ayırır.</p>
+                    </div>
+                    <div class="b2b-preview-grid">
+                        <!-- Card 1 -->
+                        <div class="b2b-review-card-sample">
+                            <div class="r-card-header">
+                                <div class="r-user">👤 Mert Yılmaz</div>
+                                <div class="r-badge star">⭐ 10.0</div>
+                            </div>
+                            <p>"Antrenman için aradığım her şey burada. Ekipmanlar çok temiz ve personel çok ilgili. Kesinlikle tavsiye ederim!"</p>
+                            <div class="r-card-footer">
+                                <span class="r-tag">Hijyen</span> <span class="r-tag">Ekipman</span>
+                            </div>
+                        </div>
+                        <!-- Card 2 -->
+                        <div class="b2b-review-card-sample">
+                            <div class="r-card-header">
+                                <div class="r-user">👤 Elif Öztürk</div>
+                                <div class="r-badge star">⭐ 9.5</div>
+                            </div>
+                            <p>"Grup dersleri çok enerjik geçiyor. Sadece soyunma odaları biraz daha geniş olsa kusursuz olurdu."</p>
+                            <div class="r-card-footer">
+                                <span class="r-tag">Dersler</span> <span class="r-tag">Atmosfer</span>
+                            </div>
+                        </div>
+                        <!-- Partner Response Example -->
+                        <div class="b2b-review-card-sample partner-mode">
+                            <div class="partner-top">Kurumsal Yanıt ✅</div>
+                            <p><strong>Siz:</strong> Merhaba Elif Hanım, geri bildiriminiz için teşekkürler! Soyunma odalarımızı genişletme projemiz haftaya başlıyor. Sizi tekrar bekleriz!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Nasıl Çalışır? -->
+            <section class="b2b-steps-new">
+                <div class="app-container">
+                    <div class="b2b-section-header">
+                        <h2>3 Adımda Başlayın</h2>
+                    </div>
+                    <div class="b2b-steps-grid">
+                        <div class="b2b-step-item">
+                            <span class="step-badge">1</span>
+                            <h4>Profilinizi Oluşturun</h4>
+                            <p>Kurumsal bilgilerinizi ve organizasyon görsellerinizi ekleyin.</p>
+                        </div>
+                        <div class="b2b-step-item">
+                            <span class="step-badge">2</span>
+                            <h4>Yorum Toplayın</h4>
+                            <p>Sporcularınızı Sporpuan üzerinden değerlendirmeye davet edin.</p>
+                        </div>
+                        <div class="b2b-step-item">
+                            <span class="step-badge">3</span>
+                            <h4>Yönetin ve Büyütün</h4>
+                            <p>Panelinizden yorumları yanıtlayın ve performansınızı izleyin.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Final CTA -->
+            <section class="b2b-final-cta-new">
+                <div class="app-container">
+                    <div class="b2b-cta-card">
+                        <h2>Topluluğa Katılmaya Hazır Mısınız?</h2>
+                        <p>Hemen ücretsiz kaydolun ve Sporpuan dünyasında yerinizi alın.</p>
+                        <button class="b2b-cta-main btn-lg" onclick="document.getElementById('partner-modal').classList.add('active');">Ücretsiz Başla</button>
+                        <span class="b2b-micro">Kredi kartı gerekmez • İptal edebilir</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- B2B Footer (Synced with Main) -->
+            <footer class="compact-footer b2b-footer-compact">
+                <div class="app-container">
+                    <div class="footer-bar">
+                        <div class="footer-links">
+                            <a href="#" id="footer-explore-link-b2b">Keşfet</a>
+                            <a href="#">Hakkımızda</a>
+                            <a href="https://www.sporsepeti.com.tr/spor-kutuphanesi" target="_blank">Blog</a>
+                            <a href="https://www.sporsepeti.com.tr/iletisim" target="_blank">İletişim</a>
+                            <a href="#" class="footer-b2b-link-active" onclick="showHome()">Kullanıcı Modu</a>
+                        </div>
+                        <div class="footer-social">
+                            <a href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg></a>
+                            <a href="https://www.instagram.com/sporpuan/" target="_blank" rel="noopener noreferrer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
+                            <a href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
+                        </div>
+                    </div>
+                    <div class="footer-copy">
+                        Copyright &copy; 2026 <span class="logo-text" style="font-size: inherit; color: inherit;">Sporpuan</span> <br>
+                        <span style="opacity: 0.7; font-size: 0.9em; margin-top: 4px; display: inline-block;">Sporpuan bir <a href="http://sporsepeti.com.tr/" target="_blank" style="color:inherit; text-decoration:underline;">Sporsepeti</a> markasıdır.</span>
+                    </div>
+                </div>
+            </footer>
+        </div>
+
+    <!-- COMPACT FOOTER (Bottom of page) -->
+    <footer class="compact-footer" id="main-footer">
+        <div class="app-container">
+            <div class="footer-bar">
+                <div class="footer-links">
+                    <a href="#" id="footer-explore-link">Keşfet</a>
+                    <a href="#">Hakkımızda</a>
+                    <a href="https://www.sporsepeti.com.tr/spor-kutuphanesi" target="_blank">Blog</a>
+                    <a href="https://www.sporsepeti.com.tr/iletisim" target="_blank">İletişim</a>
+                    <a href="#" id="footer-b2b-link">Partner Portal</a>
+                </div>
+                <div class="footer-social">
+                    <a href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg></a>
+                    <a href="https://www.instagram.com/sporpuan/" target="_blank" rel="noopener noreferrer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
+                    <a href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
+                </div>
+            </div>
+                <div class="footer-copy">
+                    Copyright &copy; 2026 <span class="logo-text" style="font-size: inherit; color: inherit;">Sporpuan</span> <br>
+                    <span style="opacity: 0.7; font-size: 0.9em; margin-top: 4px; display: inline-block;">Sporpuan bir <a href="http://sporsepeti.com.tr/" target="_blank" style="color:inherit; text-decoration:underline;">Sporsepeti</a> markasıdır.</span>
+                </div>
+        </div>
+    </footer>
+
+    <!-- Modernized Review Modal -->
+    <div id="review-modal" class="modal">
+        <div class="modal-content review-modern">
+            <button class="close-btn">&times;</button>
+            <div class="rm-header">
+                <div class="rm-badge">Yeni Deneyim</div>
+                <h2>Deneyiminizi Puanlayın</h2>
+                <p id="rm-target-name">Mekan Adı</p>
+            </div>
+            
+            <form id="review-form" class="review-stepper">
+                <div class="review-step-1 active">
+                    <div class="sentiment-picker">
+                        <h4>Genel olarak nasıl hissettiniz?</h4>
+                        <div class="sentiment-options">
+                            <label><input type="radio" name="sentiment" value="1"><span>😞</span></label>
+                            <label><input type="radio" name="sentiment" value="2"><span>😐</span></label>
+                            <label><input type="radio" name="sentiment" value="3" checked><span>😊</span></label>
+                            <label><input type="radio" name="sentiment" value="4"><span>🤩</span></label>
+                        </div>
+                    </div>
+                    
+                    <div class="modern-rating-grid">
+                        <div class="rating-row">
+                            <div class="rr-lbl">Tesis / Kalite</div>
+                            <div class="rr-stars" data-name="tesis">
+                                <span class="star-unit" data-val="1">1</span>
+                                <span class="star-unit" data-val="2">2</span>
+                                <span class="star-unit" data-val="3">3</span>
+                                <span class="star-unit" data-val="4">4</span>
+                                <span class="star-unit" data-val="5">5</span>
+                                <span class="star-unit" data-val="6">6</span>
+                                <span class="star-unit" data-val="7">7</span>
+                                <span class="star-unit" data-val="8">8</span>
+                                <span class="star-unit" data-val="9">9</span>
+                                <span class="star-unit" data-val="10">10</span>
+                            </div>
+                        </div>
+                        <div class="rating-row">
+                            <div class="rr-lbl">Temizlik / Düzen</div>
+                            <div class="rr-stars" data-name="temizlik">
+                                <span class="star-unit" data-val="1">1</span>
+                                <span class="star-unit" data-val="2">2</span>
+                                <span class="star-unit" data-val="3">3</span>
+                                <span class="star-unit" data-val="4">4</span>
+                                <span class="star-unit" data-val="5">5</span>
+                                <span class="star-unit" data-val="6">6</span>
+                                <span class="star-unit" data-val="7">7</span>
+                                <span class="star-unit" data-val="8">8</span>
+                                <span class="star-unit" data-val="9">9</span>
+                                <span class="star-unit" data-val="10">10</span>
+                            </div>
+                        </div>
+                        <div class="rating-row">
+                            <div class="rr-lbl">Personel / İlgi</div>
+                            <div class="rr-stars" data-name="personel">
+                                <span class="star-unit" data-val="1">1</span>
+                                <span class="star-unit" data-val="2">2</span>
+                                <span class="star-unit" data-val="3">3</span>
+                                <span class="star-unit" data-val="4">4</span>
+                                <span class="star-unit" data-val="5">5</span>
+                                <span class="star-unit" data-val="6">6</span>
+                                <span class="star-unit" data-val="7">7</span>
+                                <span class="star-unit" data-val="8">8</span>
+                                <span class="star-unit" data-val="9">9</span>
+                                <span class="star-unit" data-val="10">10</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="rm-actions">
+                        <button type="button" class="next-step-btn primary-btn">Detaylara Geç &rarr;</button>
+                    </div>
+                </div>
+
+                <div class="review-step-2">
+                    <div class="rm-textarea-wrap">
+                        <label>Düşünceleriniz</label>
+                        <textarea name="comment" placeholder="Diğer sporcuların bilmesi gereken detayları yazın..." required></textarea>
+                        <div class="rm-char-hint">Min. 20 karakter</div>
+                    </div>
+                    
+                    <div class="rm-photo-upload">
+                        <div class="upload-trigger">
+                            <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                            <span>Fotoğraf Ekle (Opsiyonel)</span>
+                        </div>
+                    </div>
+
+                    <div class="score-summary-preview">
+                        <div class="ssp-val" id="rm-calc-score">0.0</div>
+                        <div class="ssp-lbl">Sporpuan Skoru</div>
+                    </div>
+
+                    <div class="rm-actions">
+                        <button type="button" class="prev-step-btn outline-btn">Geri Git</button>
+                        <button type="submit" class="submit-review-btn primary-btn">Değerlendirmeyi Yayınla</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+name: API Scheduled Runner
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every day. You can customize the cron syntax.
+    - cron: '0 0 * * *'
+  # Enables running the workflow manually from the GitHub Actions UI.
+  workflow_dispatch:
+
+jobs:
+  run-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Node 20 natively supports fetch()
+
+      - name: Run API script
+        run: node api.js
