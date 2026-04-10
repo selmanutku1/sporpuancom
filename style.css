@@ -80,7 +80,7 @@ body.modal-open { overflow: hidden; }
     padding: 3rem 0 1rem; 
     text-align: center; 
     color: #fff;
-    border-radius: 0 0 40px 40px;
+    border-radius: 0;
     margin-bottom: 0;
     height: calc(100vh - 130px); /* Account for header (68px) and footer (~60px) */
     display: flex;
