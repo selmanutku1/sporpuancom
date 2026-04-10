@@ -31,6 +31,22 @@ body.modal-open { overflow: hidden; }
 
 .app-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
 
+/* HOME VIEW: Always full width, JS-independent */
+#home-view {
+    width: 100%;
+    overflow: hidden;
+}
+#home-view > main.app-container {
+    max-width: none !important;
+    width: 100% !important;
+    padding: 0 !important;
+}
+.hero-section {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
 
 /* TOP BANNER */
 .top-banner { background-color: var(--sporpuan-navy); color: #fff; padding: 0.6rem 0; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s; }
