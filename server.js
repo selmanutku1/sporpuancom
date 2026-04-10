@@ -346,8 +346,8 @@ const handler = (req, res) => {
 
     // 3. Serve Static Files
     const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
-    let filePath = '.' + parsedUrl.pathname;
-    if (filePath === './') filePath = './index.html';
+    let filePath = path.join(__dirname, parsedUrl.pathname);
+    if (parsedUrl.pathname === '/') filePath = path.join(__dirname, 'index.html');
 
     const extname = String(path.extname(filePath)).toLowerCase();
     const contentType = MIME_TYPES[extname] || 'application/octet-stream';
