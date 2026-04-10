@@ -3,7 +3,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 3000; // Changed back to 3000 or a common non-privileged port
+const PORT = 8001; // Changed to 8001 to avoid EPERM on 3000
 console.log(`DEBUG: Sunucu portu set edildi: ${PORT}`);
 
 const MIME_TYPES = {
@@ -27,7 +27,7 @@ function getUsers() {
 }
 
 function saveUsers(users) {
-    fs.writeFileSync(DB_FILE, JSON.stringify(users, null, 2));
+    try { fs.writeFileSync(DB_FILE, JSON.stringify(users, null, 2)); } catch(e) {}
 }
 
 function getPartners() {
@@ -39,10 +39,10 @@ function getPartners() {
 }
 
 function savePartners(partners) {
-    fs.writeFileSync(PARTNER_DB_FILE, JSON.stringify(partners, null, 2));
+    try { fs.writeFileSync(PARTNER_DB_FILE, JSON.stringify(partners, null, 2)); } catch(e) {}
 }
 
-const server = http.createServer((req, res) => {
+const handler = (req, res) => {
     console.log(`DEBUG: Gelen istek (Request): ${req.method} ${req.url}`);
     // Enable CORS for all responses
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -366,17 +366,19 @@ const server = http.createServer((req, res) => {
             res.end(content, 'utf-8');
         }
     });
-});
+};
 
-server.on('error', (err) => {
-    console.error("SUNUCU HATASI (Server Error):", err);
-});
+if (require.main === module) {
+    const server = http.createServer(handler);
+    server.on('error', (err) => {
+        console.error("SUNUCU HATASI (Server Error):", err);
+    });
+    server.listen(PORT, '127.0.0.1', () => {
+        console.log(`===========================================`);
+        console.log(`Sunucu Başarıyla Başlatıldı`);
+        console.log(`Adres: http://localhost:${PORT}`);
+        console.log(`===========================================`);
+    });
+}
 
-server.listen(PORT, '0.0.0.0', () => {
-    console.log(`===========================================`);
-    console.log(`Sunucu Başarıyla Başlatıldı (Server successfully running)`);
-    console.log(`Adres: http://localhost:${PORT}`);
-    console.log(`Proxy sunucusu aktif: /api-proxy/`);
-    console.log(`Auth API aktif: /api/auth/`);
-    console.log(`===========================================`);
-});
+module.exports = handler;
