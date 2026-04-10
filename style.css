@@ -16,7 +16,7 @@
     --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
     --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
     
-    --container-width: 1200px;
+    --container-width: 1400px;
     --sporpuan-purple: #8b5cf6;
 }
 
@@ -29,7 +29,8 @@ body {
 
 body.modal-open { overflow: hidden; }
 
-.app-container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+.app-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+
 
 /* TOP BANNER */
 .top-banner { background-color: var(--sporpuan-navy); color: #fff; padding: 0.6rem 0; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s; }
@@ -66,7 +67,8 @@ body.modal-open { overflow: hidden; }
     background: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.75)), url('sporting_event_hero.png');
     background-size: cover;
     background-position: center;
-    padding: 8rem 0; 
+    padding: 0; 
+    min-height: 100vh;
     text-align: center; 
     color: #fff;
     border-radius: 0 0 40px 40px;
