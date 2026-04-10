@@ -102,6 +102,10 @@
                                 <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                                 Değerlendirmelerim
                             </button>
+                            <button class="upd-menu-item" id="upd-admin-btn" style="display: none; background: rgba(147, 51, 234, 0.1); color: #9333ea; font-weight: 800;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                                Yönetim Paneli
+                            </button>
                             <div class="upd-divider"></div>
                             <button class="upd-menu-item" id="upd-settings-btn">
                                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
@@ -658,6 +662,105 @@
                 <input type="email" placeholder="E-posta Adresi" required>
                 <button type="submit">Davetiye Gönder</button>
             </form>
+        </div>
+    </div>
+
+    <!-- ENHANCED MANAGEMENT DASHBOARD VIEW -->
+    <div id="dashboard-view" style="display: none;" class="dashboard-view">
+        <header class="dash-header">
+            <div class="dash-title">
+                <h1>Yönetim Paneli</h1>
+                <p>Sporpuan platformu genel performans ve etkileşim özetiniz.</p>
+            </div>
+            <div class="dash-actions">
+                <button class="auth-submit-btn" style="padding: 0.8rem 1.5rem; background: #fff; color: var(--sporpuan-navy); border: 1px solid #e2e8f0;">Rapor İndir</button>
+                <button class="auth-submit-btn" style="padding: 0.8rem 1.5rem;">+ Yeni Etkinlik</button>
+            </div>
+        </header>
+
+        <div class="dash-grid">
+            <div class="dash-stat-card">
+                <div class="dsc-header" style="display: flex; justify-content: space-between;">
+                    <div class="dsc-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    </div>
+                    <span class="trend-up">+12%</span>
+                </div>
+                <div class="dsc-info">
+                    <h3 id="dash-total-users">12,840</h3>
+                    <p>Toplam Üye</p>
+                </div>
+            </div>
+            <div class="dash-stat-card">
+                <div class="dsc-header" style="display: flex; justify-content: space-between;">
+                    <div class="dsc-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    </div>
+                    <span class="trend-up">+5.2%</span>
+                </div>
+                <div class="dsc-info">
+                    <h3 id="dash-total-facilities">482</h3>
+                    <p>Aktif Tesis</p>
+                </div>
+            </div>
+            <div class="dash-stat-card">
+                <div class="dsc-header" style="display: flex; justify-content: space-between;">
+                    <div class="dsc-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    </div>
+                    <span class="trend-down">-2.1%</span>
+                </div>
+                <div class="dsc-info">
+                    <h3 id="dash-avg-score">8.7</h3>
+                    <p>Ort. Skor</p>
+                </div>
+            </div>
+            <div class="dash-stat-card">
+                <div class="dsc-header" style="display: flex; justify-content: space-between;">
+                    <div class="dsc-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    </div>
+                    <span class="trend-up">+24%</span>
+                </div>
+                <div class="dsc-info">
+                    <h3 id="dash-total-reviews">2,150</h3>
+                    <p>Yeni Yorum</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dash-main-content">
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <h3>Kullanıcı Etkileşimi</h3>
+                    <select style="border: none; background: #f8fafc; padding: 0.5rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        <option>Son 7 Gün</option>
+                        <option>Son 30 Gün</option>
+                    </select>
+                </div>
+                <div class="chart-placeholder" id="user-growth-chart">
+                    <!-- Dynamic Bars -->
+                    <div class="chart-bar" style="height: 40%;"></div>
+                    <div class="chart-bar" style="height: 60%;"></div>
+                    <div class="chart-bar" style="height: 50%;"></div>
+                    <div class="chart-bar" style="height: 90%;"></div>
+                    <div class="chart-bar" style="height: 70%;"></div>
+                    <div class="chart-bar" style="height: 85%;"></div>
+                    <div class="chart-bar" style="height: 95%;"></div>
+                </div>
+            </div>
+
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <h3>Son Aktiviteler</h3>
+                    <a href="#" style="font-size: 0.85rem; color: #3b82f6; font-weight: 700; text-decoration: none;">Tümünü Gör</a>
+                </div>
+                <table class="dash-table-modern">
+                    <tbody id="dash-activity-list">
+                        <!-- Dynamic list -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 

@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const b2bView = document.getElementById('b2b-view');
     const profileView = document.getElementById('profile-view');
     const adminView = document.getElementById('admin-view');
+    const dashboardView = document.getElementById('dashboard-view');
     const partnerDashboardView = document.getElementById('partner-dashboard-view');
     const compactFooter = document.getElementById('main-footer');
     
@@ -100,6 +101,63 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentFilter = 'Facility';
 
     async function initializeApp() {
+        console.log("App Initializing...");
+        // --- Robust Form Handlers ---
+        try {
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                console.log("Found login-form, attaching listener...");
+                loginForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    console.log("Login form submitted!");
+                    const email = document.getElementById('login-email').value;
+                    const role = email.includes('admin') ? 'admin' : 'user';
+                    const name = role === 'admin' ? 'Admin' : 'Kullanıcı';
+                    closeModal(loginModal);
+                    processAuth(name, email, role);
+                });
+            }
+
+            const regForm = document.getElementById('register-form');
+            if (regForm) {
+                regForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const name = document.getElementById('reg-name').value;
+                    const email = document.getElementById('reg-email').value;
+                    closeModal(loginModal);
+                    processAuth(name, email, 'user');
+                    setTimeout(() => {
+                        showSuccessOverlay('Kayıt Başarılı! 🎉', `Hoş geldin ${name}! Profiline yönlendiriliyorsun.`);
+                    }, 500);
+                });
+            }
+
+            const partnerRegForm = document.getElementById('partner-register-form');
+            if (partnerRegForm) {
+                partnerRegForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const org = partnerRegForm.querySelectorAll('input')[0]?.value || 'Kurum';
+                    const name = partnerRegForm.querySelectorAll('input')[1]?.value || 'Partner';
+                    const email = partnerRegForm.querySelectorAll('input')[2]?.value || '';
+                    if (partnerModal) closeModal(partnerModal);
+                    processAuth(name, email, 'partner', org);
+                    setTimeout(() => {
+                        showSuccessOverlay('Partner Kaydı Başarılı! 🏢', `${org} dashboard'unuza yönlendiriliyorsun.`, 'partner');
+                    }, 500);
+                });
+            }
+            const partnerLoginForm = document.getElementById('partner-login-form');
+            if (partnerLoginForm) {
+                partnerLoginForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const email = partnerLoginForm.querySelector('input[type="email"]')?.value || 'partner@sporpuan.com';
+                    if (partnerModal) closeModal(partnerModal);
+                    processAuth('Partner', email, 'partner', 'Partner Firma');
+                });
+            }
+        } catch (err) {
+            console.error("Form Handler Attachment Error:", err);
+        }
         loader.style.display = 'block';
         try {
             const BASE_URL = 'http://localhost:8001'; 
@@ -398,30 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    function showHome() {
-        document.body.classList.remove('modal-open');
-        homeView.style.display = 'block';
-        document.body.classList.add('is-home');
-        if (exploreView) exploreView.style.display = 'none';
-        detailsView.style.display = 'none';
-        if (b2bView) b2bView.style.display = 'none';
-        if (profileView) profileView.style.display = 'none';
-        if (compactFooter) compactFooter.style.display = 'block';
-        window.scrollTo(0, 0);
-    }
 
-    function showExplore() {
-        document.body.classList.remove('modal-open');
-        homeView.style.display = 'none';
-        document.body.classList.remove('is-home');
-        if (exploreView) exploreView.style.display = 'block';
-        if (profileView) profileView.style.display = 'none';
-        detailsView.style.display = 'none';
-        if (b2bView) b2bView.style.display = 'none';
-        if (compactFooter) compactFooter.style.display = 'block';
-        window.scrollTo(0, 0);
-        applyFilters(); 
-    }
 
     function showDetailsLayout(facility) {
         document.body.classList.remove('modal-open');
@@ -920,6 +955,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Lütfen geçerli bir e-posta adresi giriniz.');
             }
         });
+    }
     // ==================== CENTRAL USER STATE & UX LOGIC ====================
 
     const userData = {
@@ -1076,7 +1112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Profile View ---
     function showView(viewId) {
         document.body.classList.remove('modal-open', 'is-home');
-        const views = [homeView, exploreView, detailsView, profileView, adminView, b2bView, partnerDashboardView];
+        const views = [homeView, exploreView, detailsView, profileView, adminView, dashboardView, b2bView, partnerDashboardView];
         views.forEach(v => { if (v) v.style.display = 'none'; });
         
         const targetView = document.getElementById(viewId);
@@ -1089,42 +1125,108 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleAuthSuccess(name, email, role, org = '—') {
-        // Add to registry if not already there
-        const exists = registeredUsers.find(u => u.email === email);
-        if (!exists) {
-            registeredUsers.push({ name, email, role, date: getTodayStr(), org });
-            renderAdminTable();
-        }
-
-        // Login
-        simulateLoginFull(name, email, role);
-        userData.role = role;
-        userData.org = org;
-
-        // Redirect based on role
-        if (role === 'partner') {
-            showView('partner-dashboard-view');
-            renderPartnerDashboard();
-        } else if (role === 'admin') {
-            showView('admin-view');
-        } else {
-            showView('profile-view');
-            renderProfileData();
-        }
+        processAuth(name, email, role, org);
     }
 
+    window.processAuth = function(name, email, role = 'user', org = '—') {
+        console.log("Processing Auth for:", name, email, role);
+        if (loader) loader.style.display = 'none'; // Force hide loader if auto-logging
+        try {
+            // Update Global State
+            userData.isLoggedIn = true;
+            userData.name = name;
+            userData.email = email;
+            userData.role = role;
+            userData.org = org;
+            isLoggedIn = true;
+
+            // Registry sync
+            const exists = registeredUsers.find(u => u.email === email);
+            if (!exists) {
+                registeredUsers.push({ name, email, role, date: getTodayStr(), org });
+            }
+            renderAdminTable();
+
+            // Header & UI Updates
+            simulateLoginFull(name, email, role);
+
+            // Redirection
+            if (role === 'admin') {
+                showView('dashboard-view');
+                renderDashboardData();
+            } else if (role === 'partner') {
+                showView('partner-dashboard-view');
+                renderPartnerDashboard();
+            } else {
+                showView('profile-view');
+                renderProfileData();
+            }
+            
+            showToast('Başarıyla giriş yapıldı!');
+        } catch (err) {
+            console.error("Critical Auth Error:", err);
+            showToast('Giriş yapılırken bir teknik hata oluştu.', 'error');
+        }
+    };
+
     function renderPartnerDashboard() {
+        try {
+            const el = (id) => document.getElementById(id);
+            if (el('pd-company-name')) el('pd-company-name').innerText = userData.org || 'Kurum';
+            if (el('pdf-company')) el('pdf-company').innerText = userData.org || 'Kurum';
+            if (el('pdf-email')) el('pdf-email').innerText = userData.email || '—';
+            if (el('pdf-phone')) el('pdf-phone').innerText = userData.phone || '0538 XXX XX XX';
+            
+            const stats = ['pds-score','pds-total','pds-approved','pds-favs'];
+            stats.forEach(id => { if(el(id)) el(id).innerText = (id==='pds-score' ? '0.0' : '0'); });
+        } catch (err) { console.error("Partner Dashboard Render Error:", err); }
+    }
+
+    function renderDashboardData() {
         const el = (id) => document.getElementById(id);
-        if (el('pd-company-name')) el('pd-company-name').innerText = userData.org;
-        if (el('pdf-company')) el('pdf-company').innerText = userData.org;
-        if (el('pdf-email')) el('pdf-email').innerText = userData.email;
-        if (el('pdf-phone')) el('pdf-phone').innerText = userData.phone || '0538 XXX XX XX';
         
-        // Populate stats if empty
-        if (el('pds-score')) el('pds-score').innerText = '0.0';
-        if (el('pds-total')) el('pds-total').innerText = '0';
-        if (el('pds-approved')) el('pds-approved').innerText = '0';
-        if (el('pds-favs')) el('pds-favs').innerText = '0';
+        // Mock stats sync with registry
+        if (el('dash-total-users')) el('dash-total-users').innerText = registeredUsers.length.toLocaleString();
+        if (el('dash-total-facilities')) el('dash-total-facilities').innerText = facilitiesData.length || '482';
+        
+        // Recent Activities
+        const activityList = el('dash-activity-list');
+        if (activityList) {
+            const activities = [
+                { user: 'Mert Kılıç', action: 'Bursa Spor Merkezi\'ni değerlendirdi', time: '2 dakika önce', score: 8.5 },
+                { user: 'Leyla Karaca', action: 'Nike Vaporfly 3 ürününü favoriledi', time: '15 dakika önce', score: null },
+                { user: 'Can Tuncer', action: 'Yeni bir tesis kaydı oluşturdu', time: '1 saat önce', score: null },
+                { user: 'Selin Öztürk', action: 'Antalya IronMan 70.3 etkinliğine katıldı', time: '3 saat önce', score: null }
+            ];
+
+            activityList.innerHTML = activities.map(a => `
+                <tr>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:0.8rem;">
+                            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(a.user)}&background=f1f5f9&color=0f172a&bold=true" style="width:32px;height:32px;border-radius:50%;">
+                            <div>
+                                <div style="font-weight:700; color:var(--sporpuan-navy);">${a.user}</div>
+                                <div style="font-size:0.75rem; color:var(--text-muted);">${a.time}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="color:#475569;">${a.action}</td>
+                    <td style="text-align:right;">
+                        ${a.score ? `<span style="background:var(--sporpuan-navy); color:#fff; padding:2px 8px; border-radius:6px; font-weight:800; font-size:0.8rem;">${a.score}</span>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Animate chart bars on load
+        const bars = document.querySelectorAll('.chart-bar');
+        bars.forEach((bar, index) => {
+            const finalHeight = bar.style.height;
+            bar.style.height = '0%';
+            setTimeout(() => {
+                bar.style.height = finalHeight;
+            }, 100 * index);
+        });
     }
 
     function renderProfileData() {
@@ -1226,6 +1328,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const updLogoutBtn = document.getElementById('upd-logout-btn');
 
     if (updProfileBtn) updProfileBtn.onclick = () => { if(profileDropdown) profileDropdown.classList.remove('active'); showProfile(); };
+    const updAdminBtn = document.getElementById('upd-admin-btn');
+    if (updAdminBtn) updAdminBtn.onclick = () => {
+        if(profileDropdown) profileDropdown.classList.remove('active');
+        showView('dashboard-view');
+        renderDashboardData();
+    };
     if (updFavsBtn) updFavsBtn.onclick = () => {
         if(profileDropdown) profileDropdown.classList.remove('active');
         showProfile();
@@ -1274,76 +1382,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Form Handlers ---
-    const loginForm = document.getElementById('login-form');
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const role = email.includes('admin') ? 'admin' : 'user';
-            const name = role === 'admin' ? 'Admin' : 'Kullanıcı';
-            
-            closeModal(loginModal);
-            handleAuthSuccess(name, email, role);
-            showToast('Giriş başarılı!');
-        });
-    }
 
-    const regForm = document.getElementById('register-form');
-    if (regForm) {
-        regForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
-            
-            closeModal(loginModal);
-            handleAuthSuccess(name, email, 'user');
-
-            setTimeout(() => {
-                showSuccessOverlay(
-                    'Kayıt Başarılı! 🎉',
-                    `Hoş geldin ${name}! Hesabın başarıyla oluşturuldu. Profiline yönlendiriliyorsun.`
-                );
-            }, 500);
-        });
-    }
-
-    const partnerRegForm = document.getElementById('partner-register-form');
-    if (partnerRegForm) {
-        partnerRegForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const inputs = partnerRegForm.querySelectorAll('input');
-            const org = inputs[0]?.value || 'Kurum';
-            const name = inputs[1]?.value || 'Partner';
-            const email = inputs[2]?.value || '';
-            
-            const pModal = document.getElementById('partner-modal');
-            if (pModal) closeModal(pModal);
-
-            handleAuthSuccess(name, email, 'partner', org);
-
-            setTimeout(() => {
-                showSuccessOverlay(
-                    'Partner Kaydı Başarılı! 🏢',
-                    `${org} adlı organizasyonunuz sisteme kaydedildi. Dashboard'unuza yönlendiriliyorsun.`,
-                    'partner'
-                );
-            }, 500);
-        });
-    }
-
-    const partnerLoginForm = document.getElementById('partner-login-form');
-    if (partnerLoginForm) {
-        partnerLoginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = partnerLoginForm.querySelector('input[type="email"]')?.value || 'partner@sporpuan.com';
-            const pModal = document.getElementById('partner-modal');
-            if (pModal) closeModal(pModal);
-            
-            handleAuthSuccess('Partner', email, 'partner', 'Partner Firma');
-            showToast('Partner girişi başarılı!');
-        });
-    }
 
     // Replace simulateLoginFull to handle roles in UI if needed
     const originalSimulateLogin = simulateLoginFull;
@@ -1361,6 +1400,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             badge.style.backgroundColor = (role === 'admin') ? '#ef4444' : (role === 'partner') ? '#10b981' : '#3b82f6';
         }
+        
+        // Show/Hide Admin Dashboard button in dropdown
+        const updAdminBtn = document.getElementById('upd-admin-btn');
+        if (updAdminBtn) updAdminBtn.style.display = (role === 'admin') ? 'flex' : 'none';
     };
 
     // Render admin table on load
@@ -1374,10 +1417,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     window.showProfile = showProfile;
 
-    function showHome() {
-        showView('home-view');
-        document.body.classList.add('is-home');
-    }
+    // (Old showHome removed - consolidated at bottom)
     window.showHome = showHome;
 
     function showExplore() {
@@ -1487,6 +1527,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initDynamicBanner();
     initializeApp();
     renderAdminTable();
-    showHome();
-}
+
+    // AUTO-LOGIN AS ADMIN FOR DASHBOARD DIRECT ACCESS
+    if (window.processAuth) {
+        window.processAuth('Admin', 'admin@sporpuan.com', 'admin');
+    } else {
+        showHome();
+    }
 });
