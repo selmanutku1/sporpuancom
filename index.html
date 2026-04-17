@@ -49,9 +49,13 @@
                 <span class="logo-text">Sporpuan</span>
             </div>
             <nav class="header-nav" style="justify-content: flex-end; width: 100%;">
-                <div class="header-user" id="open-login-btn" style="position: relative;">
+                    <!-- Mobile Menu Toggle Button -->
+                    <button class="mobile-menu-toggle" id="mobile-menu-btn" style="display:none; background:none; border:none; padding:8px; cursor:pointer; color:var(--sporpuan-navy); margin-right: 1rem;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                    </button>
+
                     <!-- Logged Out State -->
-                    <div id="user-logged-out" style="display: flex; align-items: center; gap: 0.5rem; color: var(--sporpuan-navy); font-weight: 700;">
+                    <div id="user-logged-out" style="display: flex; align-items: center; gap: 0.5rem; color: var(--sporpuan-navy); font-weight: 700; cursor: pointer;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
@@ -125,6 +129,32 @@
             </nav>
         </div>
     </header>
+
+    <!-- MOBILE MENU OVERLAY -->
+    <div class="mobile-menu-overlay" id="mobile-menu" style="display:none; position:fixed; inset:0; background:rgba(15, 23, 42, 0.95); backdrop-filter:blur(10px); z-index:2000; padding:2rem; flex-direction:column;">
+        <div class="mm-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3rem;">
+            <div class="logo">
+                <img src="sporpuan_logo_new.png" alt="Sporpuan Logo" style="height:44px;">
+                <div class="logo-text" style="color:#fff; font-size:1.5rem;">spor<strong>puan</strong></div>
+            </div>
+            <button id="mm-close-btn" style="background:none; border:none; color:#fff; font-size:2.5rem; cursor:pointer; line-height:1;">✕</button>
+        </div>
+        <div class="mm-body" style="display:flex; flex-direction:column; gap:1.8rem;">
+            <a href="#" onclick="switchView('home'); hideMobileMenu();" style="color:#fff; font-size:1.6rem; text-decoration:none; font-weight:700;">Ana Sayfa</a>
+            <a href="#" onclick="switchView('explore', 'all'); hideMobileMenu();" style="color:#fff; font-size:1.6rem; text-decoration:none; font-weight:700;">Keşfet</a>
+            <a href="#" onclick="switchView('explore', 'facility'); hideMobileMenu();" style="color:#fff; font-size:1.6rem; text-decoration:none; font-weight:700;">Tesisler</a>
+            <a href="#" onclick="switchView('explore', 'brand'); hideMobileMenu();" style="color:#fff; font-size:1.6rem; text-decoration:none; font-weight:700;">Markalar</a>
+            <a href="#" onclick="switchView('explore', 'event'); hideMobileMenu();" style="color:#fff; font-size:1.6rem; text-decoration:none; font-weight:700;">Etkinlikler</a>
+            <hr style="border:none; border-top:1px solid rgba(255,255,255,0.1); margin:1rem 0;">
+            <div id="mm-logged-out">
+                <button class="primary-btn" onclick="openAuthModal(); hideMobileMenu();" style="font-size:1.2rem; padding:1.2rem;">Giriş Yap / Üye Ol</button>
+            </div>
+            <div id="mm-logged-in" style="display:none;">
+                <a href="#" onclick="switchView('profile'); hideMobileMenu();" style="color:var(--sporpuan-green); font-size:1.6rem; text-decoration:none; font-weight:700;">Profilim</a>
+                <a href="#" id="mm-logout-btn" style="color:#ef4444; font-size:1.6rem; text-decoration:none; font-weight:700; margin-top:1rem;">Çıkış Yap</a>
+            </div>
+        </div>
+    </div>
 
     <!-- HOME VIEW -->
     <div id="home-view" class="home-view-container">

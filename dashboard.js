@@ -350,12 +350,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // ─── Sidebar Toggle ────────────────────────────────────────────────────
-    const sidebarToggleBtn = document.getElementById('sidebar-toggle');
+    // ─── Sidebar Toggle (Desktop & Mobile) ─────────────────────────
+    const desktopToggleBtn = document.getElementById('sidebar-toggle');
+    const mobileSidebarBtn = document.getElementById('mobile-sidebar-btn');
     const sidebar = document.querySelector('.dash-sidebar');
-    if (sidebarToggleBtn && sidebar) {
-        sidebarToggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+
+    if (desktopToggleBtn && sidebar) {
+        desktopToggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
     }
+
+    if (mobileSidebarBtn && sidebar) {
+        mobileSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('mobile-open');
+        });
+    }
+
+    // Close mobile sidebars on nav clicks
+    document.querySelectorAll('.ds-nav-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (window.innerWidth <= 1024) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+    });
 
     // ─── Stats Load ────────────────────────────────────────────────────────
     async function loadStats() {

@@ -374,3 +374,69 @@
 }
 textarea.fld-input { min-height: 80px; }
 
+/* Dashboard Responsive Overhaul */
+@media (max-width: 1024px) {
+    .dash-sidebar {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        bottom: 0;
+        transition: left 0.3s ease;
+    }
+    .dash-sidebar.mobile-open {
+        left: 0;
+    }
+    .dash-layout {
+        overflow-x: hidden;
+    }
+    .mobile-sidebar-toggle {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        margin-right: 0.5rem;
+        cursor: pointer;
+        color: var(--dash-text);
+    }
+    .desktop-only {
+        display: none !important;
+    }
+    .dash-topbar {
+        padding: 0 1rem;
+    }
+    .dash-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .dash-content-wrapper {
+        padding: 1rem;
+    }
+    .dash-grid-2 {
+        grid-template-columns: 1fr;
+    }
+    .dt-search {
+        display: none; /* Hide search on small mobile */
+    }
+}
+
+@media (max-width: 600px) {
+    .dash-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .dt-title h1 {
+        font-size: 1rem;
+    }
+    .primary-btn-sm span {
+        display: none;
+    }
+    .ds-card {
+        padding: 1rem;
+    }
+    .card-info .val {
+        font-size: 1.4rem;
+    }
+}
+
