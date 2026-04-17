@@ -93,7 +93,7 @@ const handler = (req, res) => {
             }
             
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Giriş başarılı', user: { name: user.name, email: user.email } }));
+            res.end(JSON.stringify({ message: 'Giriş başarılı', user: { name: user.name, email: user.email, points: user.points || 0 } }));
         });
         return;
     }
@@ -158,6 +158,54 @@ const handler = (req, res) => {
         return;
     }
 
+    // 2.5 QR Scanning Endpoint
+    if (req.url === '/api/qr/scan' && req.method === 'POST') {
+        let body = '';
+        req.on('data', chunk => { body += chunk.toString(); });
+        req.on('end', () => {
+            const { qrCode, email } = JSON.parse(body);
+            
+            let users = getUsers();
+            let userIndex = users.findIndex(u => u.email === email);
+            if(userIndex === -1) {
+                res.writeHead(404, {'Content-Type': 'application/json'});
+                return res.end(JSON.stringify({error: "Kullanıcı bulunamadı"}));
+            }
+            
+            let user = users[userIndex];
+            user.points = user.points || 0;
+            user.visits = user.visits || [];
+            
+            let message = "";
+            let bonus = 0;
+            let code = qrCode ? qrCode.toUpperCase().trim() : '';
+
+            if(code.startsWith('FACILITY:')) {
+                let facName = code.split(':')[1].replace(/-/g, ' ');
+                user.visits.push({ type: 'Facility', name: facName, date: new Date().toISOString() });
+                bonus = 10;
+                user.points += bonus;
+                message = `${facName} tesisine giriş yapıldı! +10 Puan kazandınız.`;
+            } else if (code.startsWith('EVENT:')) {
+                let evtName = code.split(':')[1].replace(/-/g, ' ');
+                user.visits.push({ type: 'Event', name: evtName, date: new Date().toISOString() });
+                bonus = 50;
+                user.points += bonus;
+                message = `${evtName} etkinliğine giriş yapıldı! Yüksek +50 Puan kazandınız.`;
+            } else {
+                res.writeHead(400, {'Content-Type': 'application/json'});
+                return res.end(JSON.stringify({error: "Geçersiz veya tanınmayan QR Kodu!"}));
+            }
+            
+            users[userIndex] = user;
+            saveUsers(users);
+            
+            res.writeHead(200, {'Content-Type': 'application/json'});
+            res.end(JSON.stringify({ message, points: user.points }));
+        });
+        return;
+    }
+
     // 3. Admin API Endpoints
     if (req.url === '/api/admin/stats' && req.method === 'GET') {
         const users = getUsers();
@@ -178,6 +226,8 @@ const handler = (req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(users.map(u => ({
             ...u,
+            points: u.points || 0,
+            visits: u.visits ? u.visits.length : 0,
             role: u.email === 'selmanutkumarmara@gmail.com' ? u.role || 'Admin' : u.role || 'Kullanıcı',
             regDate: u.regDate || '16.02.2026',
             facilities: u.role === 'Admin' ? 'Tüm Tesisler' : '—'

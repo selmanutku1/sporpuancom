@@ -1240,7 +1240,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (el('prof-avatar-img')) el('prof-avatar-img').src = avatarImg.src;
         if (el('stat-total-reviews')) el('stat-total-reviews').innerText = userData.reviews.length;
         if (el('stat-avg-score')) el('stat-avg-score').innerText = avgScore;
-        if (el('stat-favs-count')) el('stat-favs-count').innerText = userData.favorites.length;
+        if (el('stat-points')) el('stat-points').innerText = userData.points || 0;
         if (el('stat-rank')) el('stat-rank').innerText = '#' + Math.max(1, 10 - userData.reviews.length);
 
         // Badges
@@ -1533,5 +1533,67 @@ document.addEventListener('DOMContentLoaded', () => {
         window.processAuth('Admin', 'admin@sporpuan.com', 'admin');
     } else {
         showHome();
+    }
+
+    // --- QR Scanner Module Logic ---
+    const qrScanBtn = document.getElementById('qr-scan-btn');
+    if (qrScanBtn) {
+        qrScanBtn.addEventListener('click', async () => {
+            const qrInput = document.getElementById('qr-input-sim');
+            const resultMsg = document.getElementById('qr-result-msg');
+            const statPoints = document.getElementById('stat-points');
+            const code = qrInput.value.trim();
+            
+            if(!code) {
+                resultMsg.style.color = 'var(--dash-danger, #ef4444)';
+                resultMsg.textContent = 'Lütfen bir QR kodu girin!';
+                return;
+            }
+            
+            qrScanBtn.disabled = true;
+            qrScanBtn.textContent = 'Taranıyor...';
+            
+            try {
+                const res = await fetch('http://localhost:8001/api/qr/scan', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ qrCode: code, email: userData.email || 'user@sporpuan.com' })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    resultMsg.style.color = '#10b981';
+                    resultMsg.textContent = data.message;
+                    userData.points = data.points;
+                    if(statPoints) statPoints.textContent = data.points;
+                    qrInput.value = '';
+                } else {
+                    resultMsg.style.color = '#ef4444';
+                    resultMsg.textContent = data.error || 'Hata oluştu!';
+                }
+            } catch (e) {
+                console.warn('QR API Hatası. Lokal simülasyon çalışıyor.', e);
+                let bonus = 0;
+                let msg = "";
+                let codeUp = code.toUpperCase();
+                if(codeUp.startsWith('FACILITY:')) { bonus = 10; msg = `Tesis ziyareti onaylandı! +10 Puan.`; }
+                else if (codeUp.startsWith('EVENT:')) { bonus = 50; msg = `Etkinlik kaydı başarılı! Yüksek +50 Puan kazanıldı.`; }
+                else { msg = `Geçersiz veya sisteme kayıtlı olmayan QR Kodu!`; }
+                
+                if(bonus > 0) {
+                    userData.points = (userData.points || 0) + bonus;
+                    if(statPoints) statPoints.textContent = userData.points;
+                    resultMsg.style.color = '#10b981';
+                    resultMsg.textContent = msg;
+                    qrInput.value = '';
+                } else {
+                    resultMsg.style.color = '#ef4444';
+                    resultMsg.textContent = msg;
+                }
+            }
+            
+            qrScanBtn.disabled = false;
+            qrScanBtn.textContent = 'Tara';
+        });
     }
 });
