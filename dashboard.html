@@ -19,51 +19,256 @@
             <button onclick="markAllRead()" style="background:none; border:none; color:#3b82f6; font-size:0.78rem; font-weight:600; cursor:pointer;">Tümünü Okundu İşaretle</button>
         </div>
         <div id="notif-list" style="max-height:400px; overflow-y:auto;"></div>
-    </div>
+    </    <!-- ADD CONTENT MODAL -->
+    <div id="content-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:1100; align-items:center; justify-content:center; overflow-y:auto; padding:2rem 0;">
+        <div id="content-modal-box" style="background:#fff; border-radius:20px; width:100%; max-width:620px; box-shadow:0 30px 80px rgba(0,0,0,.2); position:relative; margin:auto;">
+            <!-- Header -->
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:1.75rem 2rem 0;">
+                <div>
+                    <h3 id="modal-main-title" style="margin:0 0 0.25rem; font-size:1.3rem; font-weight:800; color:#0f172a;">Yeni İçerik Ekle</h3>
+                    <p style="margin:0; color:#64748b; font-size:0.85rem;">Türü seçin ve alanları doldurun.</p>
+                </div>
+                <button onclick="closeContentModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:34px; height:34px; cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center;">✕</button>
+            </div>
 
-    <!-- ADD CONTENT MODAL -->
-    <div id="content-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:1100; display:none; align-items:center; justify-content:center;" onclick="closeContentModal(event)">
-        <div style="background:#fff; border-radius:20px; padding:2.5rem; width:100%; max-width:560px; box-shadow:0 30px 80px rgba(0,0,0,.2); position:relative;">
-            <button onclick="closeContentModal()" style="position:absolute; top:1.2rem; right:1.2rem; background:#f1f5f9; border:none; border-radius:50%; width:32px; height:32px; cursor:pointer; font-size:1.1rem; line-height:32px; text-align:center;">✕</button>
-            <h3 style="margin:0 0 0.5rem; font-size:1.3rem; color:#0f172a;">Yeni İçerik Ekle</h3>
-            <p style="margin:0 0 1.5rem; color:#64748b; font-size:0.9rem;">Sisteme yeni bir tesis, marka veya etkinlik ekleyin.</p>
-
-            <div style="display:flex; gap:0.75rem; margin-bottom:1.5rem;">
+            <!-- Type Selector -->
+            <div style="display:flex; gap:0.6rem; padding:1.25rem 2rem; border-bottom:1px solid #f1f5f9;">
                 <button class="content-type-btn active" data-type="facility" onclick="selectContentType(this)">🏢 Tesis</button>
                 <button class="content-type-btn" data-type="brand" onclick="selectContentType(this)">🏷️ Marka</button>
                 <button class="content-type-btn" data-type="event" onclick="selectContentType(this)">📅 Etkinlik</button>
             </div>
 
-            <form id="add-content-form" onsubmit="submitNewContent(event)" style="display:flex; flex-direction:column; gap:1rem;">
-                <div>
-                    <label style="font-size:0.85rem; font-weight:600; color:#475569; display:block; margin-bottom:0.4rem;">Ad *</label>
-                    <input type="text" id="nc-name" required placeholder="Örn: Kadıköy Fitness Center" style="width:100%; border:1px solid #e2e8f0; border-radius:10px; padding:0.75rem; font-family:inherit; box-sizing:border-box; outline:none;">
+            <form id="add-content-form" onsubmit="submitNewContent(event)" style="padding:1.5rem 2rem 2rem;">
+
+                <!-- ═══════════ TESİS FORM ═══════════ -->
+                <div id="fields-facility">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                        <div style="grid-column:1/-1;">
+                            <label class="fld-label">Tesis Adı *</label>
+                            <input type="text" id="f-name" required placeholder="Örn: Bursa Fitness Plus" class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Kategori</label>
+                            <select id="f-category" class="fld-input">
+                                <option>Fitness</option><option>Yüzme Havuzu</option><option>Tenis Kortu</option>
+                                <option>Açık Saha</option><option>Spor Salonu</option><option>Outdoor</option>
+                                <option>Basketbol Sahası</option><option>Futbol Sahası</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="fld-label">Şehir</label>
+                            <select id="f-city" class="fld-input">
+                                <option>İstanbul</option><option>Ankara</option><option>İzmir</option>
+                                <option>Bursa</option><option>Antalya</option><option>Trabzon</option>
+                                <option>Konya</option><option>Adana</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="fld-label">Açık Adres</label>
+                            <input type="text" id="f-address" placeholder="Mahalle, ilçe..." class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Telefon</label>
+                            <input type="tel" id="f-phone" placeholder="0212 000 00 00" class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Website</label>
+                            <input type="url" id="f-website" placeholder="https://..." class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Açılış Saati</label>
+                            <input type="time" id="f-open" value="08:00" class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Kapanış Saati</label>
+                            <input type="time" id="f-close" value="22:00" class="fld-input">
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <label class="fld-label">Açıklama</label>
+                            <textarea id="f-desc" rows="3" placeholder="Tesis hakkında kısa açıklama..." class="fld-input" style="resize:none;"></textarea>
+                        </div>
+                        <div>
+                            <label class="fld-label">Sahip / Firma Adı</label>
+                            <input type="text" id="f-owner" placeholder="Örn: Spor A.Ş." class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Başlangıç Puanı</label>
+                            <input type="number" id="f-score" value="7.5" min="0" max="10" step="0.1" class="fld-input">
+                        </div>
+                    </div>
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+
+                <!-- ═══════════ MARKA FORM ═══════════ -->
+                <div id="fields-brand" style="display:none;">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                        <div style="grid-column:1/-1;">
+                            <label class="fld-label">Marka Adı *</label>
+                            <input type="text" id="b-name" placeholder="Örn: Nike Türkiye" class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Marka Türü</label>
+                            <select id="b-type" class="fld-input">
+                                <option>Spor Giyim</option><option>Ayakkabı</option><option>Ekipman</option>
+                                <option>Beslenme / Supplement</option><option>Teknoloji</option><option>Diğer</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="fld-label">Ülke / Köken</label>
+                            <input type="text" id="b-country" placeholder="Örn: Türkiye" class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Website</label>
+                            <input type="url" id="b-website" placeholder="https://..." class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">İletişim E-Posta</label>
+                            <input type="email" id="b-email" placeholder="info@marka.com" class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Instagram</label>
+                            <input type="text" id="b-instagram" placeholder="@kullanici" class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Twitter / X</label>
+                            <input type="text" id="b-twitter" placeholder="@kullanici" class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">LinkedIn</label>
+                            <input type="url" id="b-linkedin" placeholder="https://linkedin.com/..." class="fld-input">
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <label class="fld-label">Marka Açıklaması</label>
+                            <textarea id="b-desc" rows="3" placeholder="Markanın kısa tanıtımı..." class="fld-input" style="resize:none;"></textarea>
+                        </div>
+                        <div>
+                            <label class="fld-label">Başlangıç Puanı</label>
+                            <input type="number" id="b-score" value="7.0" min="0" max="10" step="0.1" class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Resmi Ortak mı?</label>
+                            <select id="b-partner" class="fld-input">
+                                <option value="0">Hayır</option>
+                                <option value="1">Evet – Onaylı Ortak</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════ ETKİNLİK FORM ═══════════ -->
+                <div id="fields-event" style="display:none;">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                        <div style="grid-column:1/-1;">
+                            <label class="fld-label">Etkinlik Adı *</label>
+                            <input type="text" id="e-name" placeholder="Örn: İstanbul Maraton 2026" class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Etkinlik Türü</label>
+                            <select id="e-type" class="fld-input">
+                                <option>Maraton</option><option>Triatlon</option><option>Festival</option>
+                                <option>Turnuva</option><option>Kamp</option><option>Antrenman</option>
+                                <option>Seminer / Workshop</option><option>Diğer</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="fld-label">Şehir</label>
+                            <select id="e-city" class="fld-input">
+                                <option>İstanbul</option><option>Ankara</option><option>İzmir</option>
+                                <option>Bursa</option><option>Antalya</option><option>Trabzon</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="fld-label">Tarih</label>
+                            <input type="date" id="e-date" class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Başlangıç Saati</label>
+                            <input type="time" id="e-time" value="09:00" class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Mekan</label>
+                            <input type="text" id="e-location" placeholder="Örn: Harbiye Cemil Topuzlu Açık Hava" class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Max. Katılımcı</label>
+                            <input type="number" id="e-capacity" placeholder="500" min="1" class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Ücret (₺)</label>
+                            <input type="number" id="e-price" placeholder="0 = Ücretsiz" min="0" value="0" class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Organizatör</label>
+                            <input type="text" id="e-organizer" placeholder="Organizer adı veya firma" class="fld-input">
+                        </div>
+                        <div>
+                            <label class="fld-label">Kayıt Linki</label>
+                            <input type="url" id="e-register" placeholder="https://..." class="fld-input">
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <label class="fld-label">Etkinlik Açıklaması</label>
+                            <textarea id="e-desc" rows="3" placeholder="Etkinlik detayları, program..." class="fld-input" style="resize:none;"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div style="display:flex; gap:0.75rem; justify-content:flex-end; margin-top:0.5rem; padding-top:1rem; border-top:1px solid #f1f5f9;">
+                    <button type="button" onclick="closeContentModal()" style="background:#f1f5f9; border:none; border-radius:10px; padding:0.75rem 1.5rem; font-weight:600; cursor:pointer; color:#475569; font-family:inherit;">İptal</button>
+                    <button type="submit" style="background:#0f172a; color:#fff; border:none; border-radius:10px; padding:0.75rem 1.75rem; font-weight:700; cursor:pointer; font-family:inherit;">Kaydet &amp; Ekle ✓</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- EDIT MODAL (for existing facilities) -->
+    <div id="edit-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:1100; align-items:center; justify-content:center;">
+        <div style="background:#fff; border-radius:20px; width:100%; max-width:560px; box-shadow:0 30px 80px rgba(0,0,0,.2); position:relative; margin:auto;">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:1.75rem 2rem 0;">
+                <h3 style="margin:0; font-size:1.2rem; font-weight:800; color:#0f172a;">Tesis Düzenle</h3>
+                <button onclick="closeEditModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:34px; height:34px; cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center;">✕</button>
+            </div>
+            <form id="edit-content-form" onsubmit="submitEditContent(event)" style="padding:1.5rem 2rem 2rem;">
+                <input type="hidden" id="edit-index">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                    <div style="grid-column:1/-1;">
+                        <label class="fld-label">Tesis Adı *</label>
+                        <input type="text" id="edit-name" required class="fld-input">
+                    </div>
                     <div>
-                        <label style="font-size:0.85rem; font-weight:600; color:#475569; display:block; margin-bottom:0.4rem;">Şehir</label>
-                        <select id="nc-city" style="width:100%; border:1px solid #e2e8f0; border-radius:10px; padding:0.75rem; font-family:inherit; outline:none;">
+                        <label class="fld-label">Kategori</label>
+                        <select id="edit-category" class="fld-input">
+                            <option>Fitness</option><option>Yüzme Havuzu</option><option>Tenis Kortu</option>
+                            <option>Açık Saha</option><option>Spor Salonu</option><option>Outdoor</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="fld-label">Şehir</label>
+                        <select id="edit-city" class="fld-input">
                             <option>İstanbul</option><option>Ankara</option><option>İzmir</option>
                             <option>Bursa</option><option>Antalya</option><option>Trabzon</option>
                         </select>
                     </div>
                     <div>
-                        <label style="font-size:0.85rem; font-weight:600; color:#475569; display:block; margin-bottom:0.4rem;">Kategori</label>
-                        <select id="nc-category" style="width:100%; border:1px solid #e2e8f0; border-radius:10px; padding:0.75rem; font-family:inherit; outline:none;">
-                            <option>Fitness</option><option>Yüzme Havuzu</option><option>Tenis Kortu</option>
-                            <option>Açık Saha</option><option>Spor Salonu</option><option>Outdoor</option>
+                        <label class="fld-label">Puan (0-10)</label>
+                        <input type="number" id="edit-score" min="0" max="10" step="0.1" class="fld-input">
+                    </div>
+                    <div>
+                        <label class="fld-label">Durum</label>
+                        <select id="edit-status" class="fld-input">
+                            <option value="Aktif">Aktif</option>
+                            <option value="Beklemede">Beklemede</option>
+                            <option value="Pasif">Pasif</option>
                         </select>
                     </div>
                 </div>
-                <div>
-                    <label style="font-size:0.85rem; font-weight:600; color:#475569; display:block; margin-bottom:0.4rem;">Açıklama</label>
-                    <textarea id="nc-desc" rows="3" placeholder="Tesis/marka hakkında kısa açıklama..." style="width:100%; border:1px solid #e2e8f0; border-radius:10px; padding:0.75rem; font-family:inherit; resize:none; box-sizing:border-box; outline:none;"></textarea>
-                </div>
-                <div style="display:flex; gap:0.75rem; justify-content:flex-end; margin-top:0.5rem;">
-                    <button type="button" onclick="closeContentModal()" style="background:#f1f5f9; border:none; border-radius:10px; padding:0.75rem 1.5rem; font-weight:600; cursor:pointer; color:#475569;">İptal</button>
-                    <button type="submit" style="background:#0f172a; color:#fff; border:none; border-radius:10px; padding:0.75rem 1.5rem; font-weight:700; cursor:pointer;">Kaydet & Ekle</button>
+                <div style="display:flex; gap:0.75rem; justify-content:flex-end; padding-top:1rem; border-top:1px solid #f1f5f9;">
+                    <button type="button" onclick="closeEditModal()" style="background:#f1f5f9; border:none; border-radius:10px; padding:0.75rem 1.5rem; font-weight:600; cursor:pointer; color:#475569; font-family:inherit;">İptal</button>
+                    <button type="submit" style="background:#0f172a; color:#fff; border:none; border-radius:10px; padding:0.75rem 1.75rem; font-weight:700; cursor:pointer; font-family:inherit;">Güncelle ✓</button>
                 </div>
             </form>
+        </div>
+    </div>
+    </form>
         </div>
     </div>
 

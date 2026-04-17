@@ -94,44 +94,123 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('nc-desc').value = '';
     };
 
-    window.closeContentModal = (e) => {
-        if (e && e.target !== document.getElementById('content-modal-overlay') && e.type !== 'click') return;
-        if (e && e.target && e.target.id !== 'content-modal-overlay' && e.currentTarget && e.target !== e.currentTarget) return;
-        const overlay = document.getElementById('content-modal-overlay');
-        if (!e || e.target === overlay || e.type !== 'click' || !e.target.closest) {
-            overlay.style.display = 'none';
-        } else if (!e.target.closest('div[style*="background:#fff"]')) {
-            overlay.style.display = 'none';
-        }
+    window.closeContentModal = () => {
+        document.getElementById('content-modal-overlay').style.display = 'none';
     };
 
     window.selectContentType = (btn) => {
         document.querySelectorAll('.content-type-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         selectedContentType = btn.getAttribute('data-type');
+
+        // Show / hide correct form section
+        document.getElementById('fields-facility').style.display = selectedContentType === 'facility' ? 'block' : 'none';
+        document.getElementById('fields-brand').style.display = selectedContentType === 'brand' ? 'block' : 'none';
+        document.getElementById('fields-event').style.display = selectedContentType === 'event' ? 'block' : 'none';
+
+        // Update modal title
+        const titles = { facility: '🏢 Yeni Tesis Ekle', brand: '🏷️ Yeni Marka Ekle', event: '📅 Yeni Etkinlik Ekle' };
+        document.getElementById('modal-main-title').textContent = titles[selectedContentType] || 'Yeni İçerik Ekle';
     };
 
     window.submitNewContent = (e) => {
         e.preventDefault();
-        const name = document.getElementById('nc-name').value;
-        const city = document.getElementById('nc-city').value;
-        const category = document.getElementById('nc-category').value;
-        const desc = document.getElementById('nc-desc').value;
+        let newItem, name, notifBody;
 
-        // Add to facilities list (mock, client-side)
-        const newItem = { name, city, category, owner: 'Admin', rating: '7.5', status: 'Beklemede', desc };
-        mockFacilities.unshift(newItem);
-        loadAllFacilitiesFromMock();
-        loadRecentFacilities();
+        if (selectedContentType === 'facility') {
+            name = document.getElementById('f-name').value;
+            const city = document.getElementById('f-city').value;
+            const category = document.getElementById('f-category').value;
+            const address = document.getElementById('f-address').value;
+            const phone = document.getElementById('f-phone').value;
+            const website = document.getElementById('f-website').value;
+            const openT = document.getElementById('f-open').value;
+            const closeT = document.getElementById('f-close').value;
+            const desc = document.getElementById('f-desc').value;
+            const owner = document.getElementById('f-owner').value || 'Admin';
+            const score = document.getElementById('f-score').value;
+            newItem = { name, city, category, address, phone, website, hours: `${openT}–${closeT}`, desc, owner, rating: score, status: 'Beklemede' };
+            notifBody = `${name} (${category}, ${city}) tesisi sisteme eklendi.`;
+            mockFacilities.unshift(newItem);
+            loadAllFacilitiesFromMock();
+            loadRecentFacilities();
+
+        } else if (selectedContentType === 'brand') {
+            name = document.getElementById('b-name').value;
+            const type = document.getElementById('b-type').value;
+            const country = document.getElementById('b-country').value;
+            const website = document.getElementById('b-website').value;
+            const email = document.getElementById('b-email').value;
+            const instagram = document.getElementById('b-instagram').value;
+            const desc = document.getElementById('b-desc').value;
+            const score = document.getElementById('b-score').value;
+            const isPartner = document.getElementById('b-partner').value === '1';
+            newItem = { name, category: type, city: country || 'Türkiye', website, email, instagram, desc, owner: 'Marka', rating: score, status: isPartner ? 'Aktif' : 'Beklemede' };
+            notifBody = `${name} (${type}) markası sisteme eklendi.`;
+            mockFacilities.unshift(newItem);
+            loadAllFacilitiesFromMock();
+
+        } else if (selectedContentType === 'event') {
+            name = document.getElementById('e-name').value;
+            const type = document.getElementById('e-type').value;
+            const city = document.getElementById('e-city').value;
+            const date = document.getElementById('e-date').value;
+            const time = document.getElementById('e-time').value;
+            const location = document.getElementById('e-location').value;
+            const capacity = document.getElementById('e-capacity').value;
+            const price = document.getElementById('e-price').value;
+            const organizer = document.getElementById('e-organizer').value;
+            const desc = document.getElementById('e-desc').value;
+            newItem = { name, category: type, city, address: `${location} – ${date} ${time}`, owner: organizer || 'Admin', rating: '8.0', status: 'Beklemede', price, capacity, desc };
+            notifBody = `${name} (${type}, ${city}) etkinliği ${date} tarihli olarak eklendi.`;
+            mockFacilities.unshift(newItem);
+            loadAllFacilitiesFromMock();
+        }
 
         document.getElementById('content-modal-overlay').style.display = 'none';
         showToast(`"${name}" başarıyla sisteme eklendi!`);
 
-        notifications.unshift({ id: Date.now(), title: 'Yeni İçerik Eklendi', body: `${name} (${category}, ${city}) sisteme eklendi.`, read: false, time: 'Az önce' });
+        notifications.unshift({ id: Date.now(), title: 'Yeni İçerik Eklendi', body: notifBody, read: false, time: 'Az önce' });
         renderNotifications('notif-list');
         renderNotifications('notif-tab-list');
         updateNotifBadge();
     };
+
+    // ─── Edit Modal ────────────────────────────────────────────────────────
+    window.openEditModal = (index) => {
+        const f = mockFacilities[index];
+        if (!f) return;
+        document.getElementById('edit-index').value = index;
+        document.getElementById('edit-name').value = f.name || '';
+        const catSel = document.getElementById('edit-category');
+        [...catSel.options].forEach(o => o.selected = o.value === f.category);
+        const citySel = document.getElementById('edit-city');
+        [...citySel.options].forEach(o => o.selected = o.value === f.city);
+        document.getElementById('edit-score').value = f.rating || 7.5;
+        const statusSel = document.getElementById('edit-status');
+        [...statusSel.options].forEach(o => o.selected = o.value === f.status);
+        document.getElementById('edit-modal-overlay').style.display = 'flex';
+    };
+
+    window.closeEditModal = () => {
+        document.getElementById('edit-modal-overlay').style.display = 'none';
+    };
+
+    window.submitEditContent = (e) => {
+        e.preventDefault();
+        const idx = parseInt(document.getElementById('edit-index').value);
+        if (isNaN(idx) || !mockFacilities[idx]) return;
+        mockFacilities[idx].name = document.getElementById('edit-name').value;
+        mockFacilities[idx].category = document.getElementById('edit-category').value;
+        mockFacilities[idx].city = document.getElementById('edit-city').value;
+        mockFacilities[idx].rating = document.getElementById('edit-score').value;
+        mockFacilities[idx].status = document.getElementById('edit-status').value;
+        loadAllFacilitiesFromMock();
+        loadRecentFacilities();
+        document.getElementById('edit-modal-overlay').style.display = 'none';
+        showToast(`"${mockFacilities[idx].name}" güncellendi!`);
+    };
+
 
     // ─── Global Search ─────────────────────────────────────────────────────
     window.doGlobalSearch = (query) => {
@@ -370,7 +449,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td><strong>⭐ ${parseFloat(f.rating).toFixed(1)}</strong></td>
                 <td><span class="status-badge ${f.status === 'Aktif' ? 'active' : 'pending'}">${f.status}</span></td>
                 <td>
-                    <button class="btn-icon" title="Düzenle" onclick="showToast('Düzenleme yakında!')">
+                    <button class="btn-icon" title="Düzenle" onclick="openEditModal(${i})">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                     </button>
                     <button class="btn-icon danger" title="Kaldır" onclick="removeFacility(${i})">
