@@ -427,16 +427,23 @@ textarea.fld-input { min-height: 80px; }
         grid-template-columns: 1fr;
     }
     .dt-title h1 {
-        font-size: 1rem;
+        font-size: 0.8rem;
     }
     .primary-btn-sm span {
         display: none;
     }
     .ds-card {
-        padding: 1rem;
+        padding: 0.85rem;
     }
     .card-info .val {
-        font-size: 1.4rem;
+        font-size: 1.2rem;
+    }
+    .card-info .label {
+        font-size: 0.75rem;
+    }
+    .ds-nav-item {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
     }
 }
 

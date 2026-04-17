@@ -166,54 +166,52 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // --- Mobile Menu Toggle ---
-            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-            const mmCloseBtn = document.getElementById('mm-close-btn');
-            const mobileMenu = document.getElementById('mobile-menu');
-            const mmLogoutBtn = document.getElementById('mm-logout-btn');
-
-            if (mobileMenuBtn) {
-                mobileMenuBtn.onclick = () => {
-                    mobileMenu.style.display = 'flex';
-                    document.body.style.overflow = 'hidden';
-                    updateMobileMenuUser();
-                };
-            }
-
-            if (mmCloseBtn) {
-                mmCloseBtn.onclick = hideMobileMenu;
-            }
-            
-            if (mmLogoutBtn) {
-                mmLogoutBtn.onclick = () => {
-                    logoutUser();
-                    hideMobileMenu();
-                };
-            }
-
-            window.hideMobileMenu = () => {
-                if (mobileMenu) {
-                    mobileMenu.style.display = 'none';
-                    document.body.style.overflow = '';
-                }
-            };
-
-            function updateMobileMenuUser() {
-                const mmLoggedOut = document.getElementById('mm-logged-out');
-                const mmLoggedIn = document.getElementById('mm-logged-in');
-                
-                if (currentUser) {
-                    if (mmLoggedOut) mmLoggedOut.style.display = 'none';
-                    if (mmLoggedIn) mmLoggedIn.style.display = 'block';
-                } else {
-                    if (mmLoggedOut) mmLoggedOut.style.display = 'block';
-                    if (mmLoggedIn) mmLoggedIn.style.display = 'none';
-                }
-            }
-
         } catch (err) {
             console.error("Form Handler Attachment Error:", err);
         }
+
+        // --- Mobile Menu Toggle (Global Scope) ---
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mmCloseBtn = document.getElementById('mm-close-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        window.showMobileMenu = () => {
+            if (mobileMenu) {
+                mobileMenu.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                if (window.updateMobileMenuUser) updateMobileMenuUser();
+            }
+        };
+
+        window.hideMobileMenu = () => {
+            if (mobileMenu) {
+                mobileMenu.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        };
+
+        if (mobileMenuBtn) mobileMenuBtn.onclick = showMobileMenu;
+        if (mmCloseBtn) mmCloseBtn.onclick = hideMobileMenu;
+
+        window.updateMobileMenuUser = function() {
+            const mmLoggedOut = document.getElementById('mm-logged-out');
+            const mmLoggedIn = document.getElementById('mm-logged-in');
+            const mmLogoutBtn = document.getElementById('mm-logout-btn');
+            
+            if (currentUser && currentUser.isLoggedIn) {
+                if (mmLoggedOut) mmLoggedOut.style.display = 'none';
+                if (mmLoggedIn) mmLoggedIn.style.display = 'block';
+                if (mmLogoutBtn) {
+                    mmLogoutBtn.onclick = () => {
+                        logoutUser();
+                        hideMobileMenu();
+                    };
+                }
+            } else {
+                if (mmLoggedOut) mmLoggedOut.style.display = 'block';
+                if (mmLoggedIn) mmLoggedIn.style.display = 'none';
+            }
+        };
         loader.style.display = 'block';
         try {
             const BASE_URL = ''; 
@@ -1395,20 +1393,40 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Başarıyla çıkış yapıldı.');
     }
 
-    // --- Profile View ---
-    function showView(viewId) {
+    // --- View Management ---
+    window.switchView = function(viewId, filterType = 'all') {
+        console.log("Switching to view:", viewId, filterType);
         document.body.classList.remove('modal-open', 'is-home');
+        
+        // Views
         const views = [homeView, exploreView, detailsView, profileView, adminView, dashboardView, b2bView, partnerDashboardView];
         views.forEach(v => { if (v) v.style.display = 'none'; });
         
-        const targetView = document.getElementById(viewId);
+        // Direct View ID or Mapping
+        let targetId = viewId;
+        if (viewId === 'home') targetId = 'home-view';
+        if (viewId === 'explore') targetId = 'explore-view';
+        if (viewId === 'profile') targetId = 'profile-view';
+        
+        const targetView = document.getElementById(targetId);
         if (targetView) targetView.style.display = 'block';
         
-        if (compactFooter) {
-            compactFooter.style.display = (viewId === 'home-view') ? 'none' : 'block';
+        if (targetId === 'home-view') {
+            document.body.classList.add('is-home');
         }
+
+        if (compactFooter) {
+            compactFooter.style.display = (targetId === 'home-view') ? 'none' : 'block';
+        }
+
+        if (targetId === 'explore-view' && filterType) {
+            // Logic to handle filter if needed
+            console.log("Exploring type:", filterType);
+        }
+
         window.scrollTo(0, 0);
-    }
+        if (window.hideMobileMenu) hideMobileMenu();
+    };
 
     function handleAuthSuccess(name, email, role, org = '—') {
         processAuth(name, email, role, org);
