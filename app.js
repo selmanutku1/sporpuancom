@@ -1523,13 +1523,14 @@ document.addEventListener('DOMContentLoaded', () => {
             `).join('');
         }
 
-        // Favorites
+        // Favorites with comparison support
         const favGrid = el('prof-favorites-grid');
         if (favGrid) {
-            favGrid.innerHTML = userData.favorites.map(f => `
-                <div class="prof-fav-card">
+            favGrid.innerHTML = userData.favorites.map((f, i) => `
+                <div class="prof-fav-card" data-fav-idx="${i}">
                     <div class="pfc-img" style="background-image:url('${f.img}')">
                         <div class="pfc-score">${f.score}</div>
+                        <div class="pfc-check" style="display:none; position:absolute; top:8px; left:8px; width:28px; height:28px; background:#3b82f6; border-radius:50%; color:#fff; font-weight:800; font-size:1rem; display:none; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(59,130,246,0.4);">✓</div>
                     </div>
                     <div class="pfc-body">
                         <h4>${f.name}</h4>
@@ -1539,11 +1540,226 @@ document.addEventListener('DOMContentLoaded', () => {
             `).join('');
         }
 
+        // Comparison feature
+        initComparisonFeature();
+
+
         // Settings pre-fill
         if (el('set-name')) el('set-name').value = userData.name;
         if (el('set-email')) el('set-email').value = userData.email;
         if (el('set-phone')) el('set-phone').value = userData.phone;
         if (el('set-city')) el('set-city').value = userData.city;
+    }
+
+    // ==================== FAVORITES COMPARISON ====================
+    let compareMode = false;
+    let selectedFavs = [];
+
+    function initComparisonFeature() {
+        const toggleBtn = document.getElementById('compare-toggle-btn');
+        const hint = document.getElementById('compare-hint');
+        const runBtn = document.getElementById('compare-run-btn');
+        const cancelBtn = document.getElementById('compare-cancel-btn');
+        const resultPanel = document.getElementById('compare-result-panel');
+
+        if (!toggleBtn) return;
+
+        toggleBtn.onclick = () => {
+            compareMode = !compareMode;
+            selectedFavs = [];
+            hint.style.display = compareMode ? 'block' : 'none';
+            resultPanel.style.display = 'none';
+            toggleBtn.innerText = compareMode ? 'Seçimi Kapat' : '📊 Karşılaştır';
+            updateFavCardStyles();
+        };
+
+        if (cancelBtn) cancelBtn.onclick = () => {
+            compareMode = false;
+            selectedFavs = [];
+            hint.style.display = 'none';
+            resultPanel.style.display = 'none';
+            toggleBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg> Karşılaştır`;
+            updateFavCardStyles();
+        };
+
+        // Card click handler
+        document.getElementById('prof-favorites-grid').addEventListener('click', (e) => {
+            if (!compareMode) return;
+            const card = e.target.closest('.prof-fav-card');
+            if (!card) return;
+            const idx = parseInt(card.dataset.favIdx);
+
+            if (selectedFavs.includes(idx)) {
+                selectedFavs = selectedFavs.filter(i => i !== idx);
+            } else if (selectedFavs.length < 4) {
+                selectedFavs.push(idx);
+            } else {
+                showToast('En fazla 4 tesis seçebilirsiniz.');
+                return;
+            }
+            updateFavCardStyles();
+        });
+
+        if (runBtn) runBtn.onclick = () => {
+            if (selectedFavs.length < 2) {
+                showToast('En az 2 tesis seçmelisiniz.');
+                return;
+            }
+            renderComparisonTable();
+        };
+    }
+
+    function updateFavCardStyles() {
+        document.querySelectorAll('.prof-fav-card').forEach(card => {
+            const idx = parseInt(card.dataset.favIdx);
+            const check = card.querySelector('.pfc-check');
+            if (compareMode) {
+                card.style.cursor = 'pointer';
+                if (selectedFavs.includes(idx)) {
+                    card.style.outline = '3px solid #3b82f6';
+                    card.style.outlineOffset = '-3px';
+                    if (check) { check.style.display = 'flex'; }
+                } else {
+                    card.style.outline = 'none';
+                    if (check) { check.style.display = 'none'; }
+                }
+            } else {
+                card.style.outline = 'none';
+                card.style.cursor = 'default';
+                if (check) { check.style.display = 'none'; }
+            }
+        });
+    }
+
+    function renderComparisonTable() {
+        const panel = document.getElementById('compare-result-panel');
+        if (!panel) return;
+
+        const items = selectedFavs.map(i => userData.favorites[i]);
+        const criteria = ['Tesis', 'Eğitmenler', 'Deneyim', 'Güvenlik', 'Fiyat/Performans'];
+
+        // Generate random sub-scores around the main score for demo
+        const itemsWithScores = items.map(item => {
+            const base = item.score;
+            return {
+                ...item,
+                subScores: criteria.map(() => Math.min(10, Math.max(1, (base + (Math.random() * 2 - 1)).toFixed(1))))
+            };
+        });
+
+        const colW = Math.floor(100 / (items.length + 1));
+
+        let html = `
+            <div style="background:#fff; border:1px solid var(--border-color); border-radius:16px; padding:2rem; box-shadow:var(--shadow-sm);">
+                <h3 style="font-size:1.2rem; font-weight:800; color:var(--sporpuan-navy); margin-bottom:1.5rem; display:flex; align-items:center; gap:0.5rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    Karşılaştırma Tablosu
+                </h3>
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead>
+                        <tr style="border-bottom:2px solid #e2e8f0;">
+                            <th style="text-align:left; padding:0.8rem; font-size:0.85rem; color:var(--text-muted);">Kriter</th>
+                            ${itemsWithScores.map(it => `<th style="text-align:center; padding:0.8rem;">
+                                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">${it.city}</div>
+                                <div style="font-size:0.95rem; font-weight:800; color:var(--sporpuan-navy);">${it.name}</div>
+                            </th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom:1px solid #f1f5f9; background:#f8fafc;">
+                            <td style="padding:0.8rem; font-weight:700; color:var(--sporpuan-navy);">Genel Puan</td>
+                            ${itemsWithScores.map(it => {
+                                const color = it.score >= 8.5 ? '#10b981' : it.score >= 7 ? '#3b82f6' : it.score >= 5 ? '#f59e0b' : '#ef4444';
+                                return `<td style="text-align:center; padding:0.8rem;"><span style="background:${color}; color:#fff; padding:4px 12px; border-radius:8px; font-weight:800; font-size:1.1rem;">${it.score}</span></td>`;
+                            }).join('')}
+                        </tr>
+                        ${criteria.map((c, ci) => `
+                            <tr style="border-bottom:1px solid #f1f5f9;">
+                                <td style="padding:0.8rem; font-weight:600; color:#475569; font-size:0.9rem;">${c}</td>
+                                ${itemsWithScores.map(it => {
+                                    const val = it.subScores[ci];
+                                    const perc = (val / 10) * 100;
+                                    const barColor = val >= 8.5 ? '#10b981' : val >= 7 ? '#3b82f6' : val >= 5 ? '#f59e0b' : '#ef4444';
+                                    return `<td style="text-align:center; padding:0.8rem;">
+                                        <div style="display:flex; align-items:center; gap:0.5rem; justify-content:center;">
+                                            <div style="flex:1; max-width:80px; height:8px; background:#e2e8f0; border-radius:4px; overflow:hidden;">
+                                                <div style="height:100%; width:${perc}%; background:${barColor}; border-radius:4px;"></div>
+                                            </div>
+                                            <span style="font-weight:700; font-size:0.85rem; color:var(--sporpuan-navy); min-width:28px;">${val}</span>
+                                        </div>
+                                    </td>`;
+                                }).join('')}
+                            </tr>
+                        `).join('')}
+                        <tr>
+                            <td style="padding:0.8rem; font-weight:700; color:var(--sporpuan-navy);">Tavsiye</td>
+                            ${itemsWithScores.map(it => {
+                                const rec = it.score >= 8 ? '👍 Tavsiye Edilir' : it.score >= 6 ? '🤔 Orta' : '👎 Düşük';
+                                const recColor = it.score >= 8 ? '#10b981' : it.score >= 6 ? '#f59e0b' : '#ef4444';
+                                return `<td style="text-align:center; padding:0.8rem; font-weight:700; color:${recColor}; font-size:0.9rem;">${rec}</td>`;
+                            }).join('')}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>`;
+
+        panel.innerHTML = html;
+        panel.style.display = 'block';
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ==================== QR CAMERA SCANNER ====================
+    let qrStream = null;
+
+    const qrCameraBtn = document.getElementById('qr-camera-btn');
+    const qrCameraPreview = document.getElementById('qr-camera-preview');
+    const qrVideo = document.getElementById('qr-video');
+    const qrCameraStop = document.getElementById('qr-camera-stop');
+
+    if (qrCameraBtn) {
+        qrCameraBtn.addEventListener('click', async () => {
+            try {
+                qrStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
+                });
+                qrVideo.srcObject = qrStream;
+                qrCameraPreview.style.display = 'block';
+                qrCameraBtn.style.display = 'none';
+                showToast('Kamera açıldı! QR kodu ekrana gösterin.');
+
+                // Simulate QR detection after 5 seconds for demo
+                setTimeout(() => {
+                    if (qrStream) {
+                        const resultMsg = document.getElementById('qr-result-msg');
+                        if (resultMsg) {
+                            resultMsg.style.color = '#10b981';
+                            resultMsg.textContent = '✅ QR Kod algılandı: FACILITY:demo-tesis — Tesis ziyareti onaylandı! +10 Puan.';
+                        }
+                        userData.points = (userData.points || 0) + 10;
+                        const statPoints = document.getElementById('stat-points');
+                        if (statPoints) statPoints.textContent = userData.points;
+                        stopQRCamera();
+                    }
+                }, 5000);
+            } catch (err) {
+                console.error('Camera error:', err);
+                showToast('Kamera erişimi reddedildi. Lütfen izin verin veya manuel giriş kullanın.');
+            }
+        });
+    }
+
+    function stopQRCamera() {
+        if (qrStream) {
+            qrStream.getTracks().forEach(track => track.stop());
+            qrStream = null;
+        }
+        if (qrVideo) qrVideo.srcObject = null;
+        if (qrCameraPreview) qrCameraPreview.style.display = 'none';
+        if (qrCameraBtn) qrCameraBtn.style.display = 'inline-flex';
+    }
+
+    if (qrCameraStop) {
+        qrCameraStop.addEventListener('click', stopQRCamera);
     }
 
     // --- Profile Sidebar Tab Switching ---

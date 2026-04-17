@@ -406,11 +406,23 @@
 
                 <!-- FAVORITES TAB -->
                 <div id="prof-favorites-sect" class="prof-sect">
-                    <div class="prof-sect-header">
-                        <h2>Favorilerim</h2>
-                        <p>Beğendiğiniz mekanları burada saklayın.</p>
+                    <div class="prof-sect-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                        <div>
+                            <h2>Favorilerim</h2>
+                            <p>Beğendiğiniz mekanları burada saklayın.</p>
+                        </div>
+                        <button id="compare-toggle-btn" type="button" style="background:linear-gradient(135deg, #3b82f6, #6366f1); color:#fff; border:none; padding:0.7rem 1.5rem; border-radius:10px; font-weight:700; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; transition:all 0.3s; box-shadow:0 4px 12px rgba(59,130,246,0.2);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                            Karşılaştır
+                        </button>
                     </div>
+                    <p id="compare-hint" style="display:none; color:#3b82f6; font-weight:600; font-size:0.9rem; margin-bottom:1rem; background:#eff6ff; padding:0.8rem 1rem; border-radius:10px; border:1px solid #bfdbfe;">
+                        📊 Karşılaştırmak istediğiniz tesisleri seçin (en az 2, en fazla 4)
+                        <button id="compare-run-btn" type="button" style="float:right; background:#3b82f6; color:#fff; border:none; padding:0.4rem 1rem; border-radius:8px; font-weight:700; cursor:pointer; font-family:inherit; font-size:0.85rem;">Karşılaştır</button>
+                        <button id="compare-cancel-btn" type="button" style="float:right; background:#f1f5f9; color:#64748b; border:1px solid #e2e8f0; padding:0.4rem 1rem; border-radius:8px; font-weight:600; cursor:pointer; font-family:inherit; font-size:0.85rem; margin-right:0.5rem;">İptal</button>
+                    </p>
                     <div id="prof-favorites-grid" class="prof-fav-grid"></div>
+                    <div id="compare-result-panel" style="display:none; margin-top:2rem;"></div>
                 </div>
 
                 <!-- QR SCANNER TAB -->
@@ -420,20 +432,40 @@
                         <p>Tesise giriş yapmak veya etkinliklerden puan kazanmak için kameranızı kullanarak QR kodunuzu okutun.</p>
                     </div>
                     
-                    <div class="qr-scanner-container" style="background:#f8fafc; border:2px dashed #cbd5e1; border-radius:16px; padding:3rem 1rem; text-align:center; max-width:500px; margin:0 auto;">
-                        <div class="qr-icon-wrap" style="background:#e2e8f0; width:80px; height:80px; border-radius:20px; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem;">
-                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--sporpuan-navy)" stroke-width="2"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"></path><path d="M14 14h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z"></path></svg>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; max-width:700px; margin:0 auto;">
+                        <!-- Camera Scan -->
+                        <div class="qr-scanner-container" style="background:#f8fafc; border:2px dashed #10b981; border-radius:16px; padding:2rem 1rem; text-align:center;">
+                            <div style="background:#dcfce7; width:70px; height:70px; border-radius:18px; display:flex; align-items:center; justify-content:center; margin:0 auto 1.2rem;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                            </div>
+                            <h3 style="margin:0 0 0.5rem; color:var(--text-main); font-size:1.1rem;">Kamera ile Tara</h3>
+                            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1.2rem;">Kameranızı QR koda doğrultun</p>
+                            <button id="qr-camera-btn" type="button" style="background:var(--sporpuan-green); color:#fff; border:none; padding:0.8rem 2rem; border-radius:10px; font-weight:700; cursor:pointer; font-family:inherit; font-size:0.95rem; display:inline-flex; align-items:center; gap:0.5rem; transition:all 0.3s;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                                QR Tara
+                            </button>
+                            <div id="qr-camera-preview" style="display:none; margin-top:1rem; border-radius:12px; overflow:hidden; position:relative;">
+                                <video id="qr-video" style="width:100%; border-radius:12px;" autoplay playsinline></video>
+                                <button id="qr-camera-stop" type="button" style="position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.6); color:#fff; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:1.1rem;">✕</button>
+                            </div>
                         </div>
-                        <h3 style="margin:0 0 0.5rem; color:var(--text-main);">QR Kodu Simüle Et</h3>
-                        <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem;">Test amaçlı QR kodunu manuel olarak girebilirsiniz (Örn: FACILITY:bursa-spor veya EVENT:maraton-2026)</p>
-                        
-                        <div style="display:flex; justify-content:center; gap:0.5rem; max-width:80%; margin:0 auto;">
-                            <input type="text" id="qr-input-sim" placeholder="Barkod veya QR Kodu..." style="flex:1; border:1px solid var(--border-color); border-radius:8px; padding:0.8rem; outline:none; font-family:inherit;">
-                            <button id="qr-scan-btn" class="primary-btn-sm" style="background:var(--sporpuan-green); color:#fff; border:none; padding:0 1.5rem; border-radius:8px; font-weight:700; cursor:pointer;">Tara</button>
+
+                        <!-- Manual Entry -->
+                        <div class="qr-scanner-container" style="background:#f8fafc; border:2px dashed #cbd5e1; border-radius:16px; padding:2rem 1rem; text-align:center;">
+                            <div style="background:#e2e8f0; width:70px; height:70px; border-radius:18px; display:flex; align-items:center; justify-content:center; margin:0 auto 1.2rem;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--sporpuan-navy)" stroke-width="2"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"></path><path d="M14 14h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z"></path></svg>
+                            </div>
+                            <h3 style="margin:0 0 0.5rem; color:var(--text-main); font-size:1.1rem;">Manuel Giriş</h3>
+                            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1.2rem;">Kodu elle girin (Ör: FACILITY:bursa-spor)</p>
+                            <div style="display:flex; gap:0.5rem; margin:0 auto;">
+                                <input type="text" id="qr-input-sim" placeholder="Barkod veya QR Kodu..." style="flex:1; border:1px solid var(--border-color); border-radius:8px; padding:0.8rem; outline:none; font-family:inherit; font-size:0.9rem;">
+                                <button id="qr-scan-btn" style="background:var(--sporpuan-green); color:#fff; border:none; padding:0 1.2rem; border-radius:8px; font-weight:700; cursor:pointer;">Tara</button>
+                            </div>
                         </div>
-                        <div id="qr-result-msg" style="margin-top:1.5rem; font-weight:600; min-height:24px; color:var(--sporpuan-navy);"></div>
                     </div>
+                    <div id="qr-result-msg" style="margin-top:1.5rem; font-weight:600; min-height:24px; color:var(--sporpuan-navy); text-align:center;"></div>
                 </div>
+
 
                 <!-- SETTINGS TAB -->
                 <div id="prof-settings-sect" class="prof-sect">
