@@ -98,11 +98,108 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     ];
 
-    let currentFilter = 'Facility';
+    // --- Global Functions (Expose immediately for HTML onclick handlers) ---
+    window.closeModal = (modal) => { 
+        if (modal) {
+            modal.classList.remove('active'); 
+            document.body.classList.remove('modal-open'); 
+        }
+    };
+    
+    window.openModal = (modal) => {
+        if (modal) {
+            modal.classList.add('active');
+            document.body.classList.add('modal-open');
+        }
+    };
+
+    window.openAuthModal = () => {
+        if (typeof openModal === 'function') openModal(loginModal);
+        else if (window.openModal) window.openModal(loginModal);
+    };
+
+    window.showToast = (message, type = 'success') => {
+        // Simple toast simulation
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.style.position = 'fixed';
+        toast.style.bottom = '20px';
+        toast.style.right = '20px';
+        toast.style.padding = '1rem 1.5rem';
+        toast.style.background = type === 'success' ? '#10b981' : '#ef4444';
+        toast.style.color = '#fff';
+        toast.style.borderRadius = '12px';
+        toast.style.zIndex = '9999';
+        toast.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.1)';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    };
+
+    window.hideMobileMenu = () => {
+        const mm = document.getElementById('mobile-menu');
+        if (mm) {
+            mm.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    };
+
+    window.switchView = function(viewId, filterType = 'all') {
+        console.log("Switching to view:", viewId, filterType);
+        document.body.classList.remove('modal-open', 'is-home');
+        
+        const views = [
+            'home-view', 'explore-view', 'details-view', 'profile-view', 
+            'admin-view', 'dashboard-view', 'b2b-view', 'partner-dashboard-view'
+        ];
+        views.forEach(id => {
+            const v = document.getElementById(id);
+            if (v) v.style.display = 'none';
+        });
+        
+        let targetId = viewId;
+        if (viewId === 'home') targetId = 'home-view';
+        if (viewId === 'explore') targetId = 'explore-view';
+        if (viewId === 'profile') targetId = 'profile-view';
+        
+        const targetView = document.getElementById(targetId);
+        if (targetView) targetView.style.display = 'block';
+        
+        if (targetId === 'home-view') document.body.classList.add('is-home');
+        if (compactFooter) compactFooter.style.display = (targetId === 'home-view') ? 'none' : 'block';
+
+        window.scrollTo(0, 0);
+        if (window.hideMobileMenu) window.hideMobileMenu();
+    };
+
+    window.showMobileMenu = () => {
+        const mm = document.getElementById('mobile-menu');
+        if (mm) {
+            mm.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            if (window.updateMobileMenuUser) window.updateMobileMenuUser();
+        }
+    };
+
+    // --- Core UI Listeners ---
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mmCloseBtn = document.getElementById('mm-close-btn');
+    const demoLoginBtn = document.getElementById('demo-login-btn');
+
+    if (mobileMenuBtn) mobileMenuBtn.onclick = window.showMobileMenu;
+    if (mmCloseBtn) mmCloseBtn.onclick = window.hideMobileMenu;
+
+    if (demoLoginBtn) {
+        demoLoginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.closeModal(loginModal);
+            if (window.processAuth) window.processAuth('Demo Kullanıcı', 'demo@sporpuan.com', 'admin');
+            window.showToast('Demo hesabıyla giriş yapıldı! 🎉');
+        });
+    }
 
     async function initializeApp() {
         console.log("App Initializing...");
-        // --- Robust Form Handlers ---
         try {
             const loginForm = document.getElementById('login-form');
             if (loginForm) {
@@ -170,48 +267,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Form Handler Attachment Error:", err);
         }
 
-        // --- Mobile Menu Toggle (Global Scope) ---
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        const mmCloseBtn = document.getElementById('mm-close-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-
-        window.showMobileMenu = () => {
-            if (mobileMenu) {
-                mobileMenu.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-                if (window.updateMobileMenuUser) updateMobileMenuUser();
-            }
-        };
-
-        window.hideMobileMenu = () => {
-            if (mobileMenu) {
-                mobileMenu.style.display = 'none';
-                document.body.style.overflow = '';
-            }
-        };
-
-        if (mobileMenuBtn) mobileMenuBtn.onclick = showMobileMenu;
-        if (mmCloseBtn) mmCloseBtn.onclick = hideMobileMenu;
-
-        window.updateMobileMenuUser = function() {
-            const mmLoggedOut = document.getElementById('mm-logged-out');
-            const mmLoggedIn = document.getElementById('mm-logged-in');
-            const mmLogoutBtn = document.getElementById('mm-logout-btn');
-            
-            if (currentUser && currentUser.isLoggedIn) {
-                if (mmLoggedOut) mmLoggedOut.style.display = 'none';
-                if (mmLoggedIn) mmLoggedIn.style.display = 'block';
-                if (mmLogoutBtn) {
-                    mmLogoutBtn.onclick = () => {
-                        logoutUser();
-                        hideMobileMenu();
-                    };
-                }
-            } else {
-                if (mmLoggedOut) mmLoggedOut.style.display = 'block';
-                if (mmLoggedIn) mmLoggedIn.style.display = 'none';
-            }
-        };
         loader.style.display = 'block';
         try {
             const BASE_URL = ''; 
@@ -1007,7 +1062,6 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.classList.add('active');
         document.body.classList.add('modal-open');
     }
-    function closeModal(modal) { modal.classList.remove('active'); document.body.classList.remove('modal-open'); }
     window.closeModal = closeModal;
 
     let isLoggedIn = false;
@@ -1085,25 +1139,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchBtn) searchBtn.addEventListener('click', handleSearch);
     if (searchInput) searchInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleSearch(); });
 
-    // --- Toast ---
-    function showToast(message, type = 'success') {
-        let container = document.getElementById('toast-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'toast-container';
-            document.body.appendChild(container);
-        }
-        const toast = document.createElement('div');
-        toast.className = `toast-notification ${type}`;
-        toast.innerHTML = `<span>${type === 'success' ? '✓' : '⚠'}</span><span>${message}</span>`;
-        container.appendChild(toast);
-        setTimeout(() => toast.classList.add('show'), 10);
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        }, 3500);
-    }
-    window.showToast = showToast;
 
     // --- Review Carousel ---
     function initReviewCarousel() {
@@ -1394,39 +1429,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- View Management ---
-    window.switchView = function(viewId, filterType = 'all') {
-        console.log("Switching to view:", viewId, filterType);
-        document.body.classList.remove('modal-open', 'is-home');
-        
-        // Views
-        const views = [homeView, exploreView, detailsView, profileView, adminView, dashboardView, b2bView, partnerDashboardView];
-        views.forEach(v => { if (v) v.style.display = 'none'; });
-        
-        // Direct View ID or Mapping
-        let targetId = viewId;
-        if (viewId === 'home') targetId = 'home-view';
-        if (viewId === 'explore') targetId = 'explore-view';
-        if (viewId === 'profile') targetId = 'profile-view';
-        
-        const targetView = document.getElementById(targetId);
-        if (targetView) targetView.style.display = 'block';
-        
-        if (targetId === 'home-view') {
-            document.body.classList.add('is-home');
-        }
-
-        if (compactFooter) {
-            compactFooter.style.display = (targetId === 'home-view') ? 'none' : 'block';
-        }
-
-        if (targetId === 'explore-view' && filterType) {
-            // Logic to handle filter if needed
-            console.log("Exploring type:", filterType);
-        }
-
-        window.scrollTo(0, 0);
-        if (window.hideMobileMenu) hideMobileMenu();
-    };
 
     function handleAuthSuccess(name, email, role, org = '—') {
         processAuth(name, email, role, org);
