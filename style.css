@@ -3761,3 +3761,229 @@ body.is-home .recent-reviews-container {
 .trend-up { color: #10b981; font-weight: 700; font-size: 0.8rem; }
 .trend-down { color: #ef4444; font-weight: 700; font-size: 0.8rem; }
 
+
+/* Redesigned Review Modal V2 */
+.review-modern-v2 {
+    max-width: 800px;
+    width: 95%;
+    padding: 2.5rem;
+    border-radius: 24px;
+}
+
+.review-rating-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem 2rem;
+    margin-bottom: 2.5rem;
+}
+
+@media (max-width: 768px) {
+    .review-rating-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.rating-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ri-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ri-top label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.ri-val {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.ri-slider-container {
+    position: relative;
+    height: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.rating-slider {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    z-index: 5;
+    cursor: pointer;
+    margin: 0;
+}
+
+.rating-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: border-color 0.2s;
+}
+
+.rating-slider:hover::-webkit-slider-thumb {
+    border-color: #94a3b8;
+}
+
+.slider-track-bg {
+    position: absolute;
+    inset: 4px 0;
+    background: #e2e8f0;
+    border-radius: 6px;
+    z-index: 1;
+}
+
+.slider-track-fill {
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    background: #cbd5e1;
+    border-radius: 6px;
+    z-index: 2;
+    transition: width 0.1s linear;
+}
+
+.rating-item:hover .slider-track-fill {
+    background: #94a3b8;
+}
+
+/* Recommendation Section */
+.review-recommend-section {
+    margin-bottom: 2.5rem;
+}
+
+.recommend-badge {
+    background: #dcfce7;
+    color: #10b981;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.recommend-btns {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.rec-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.rec-btn svg {
+    color: #94a3b8;
+}
+
+.rec-btn:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.rec-btn.active {
+    background: #eff6ff;
+    border-color: #3b82f6;
+    color: #1e40af;
+}
+
+.rec-btn.active svg {
+    color: #3b82f6;
+}
+
+/* User Info Section */
+.review-user-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.review-user-info .input-group input {
+    background: #fff;
+}
+
+/* Comment Section */
+.review-comment-section {
+    margin-bottom: 2.5rem;
+}
+
+.review-comment-section label {
+    display: block;
+    margin-bottom: 0.8rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.review-comment-section textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    font-family: inherit;
+    font-size: 1rem;
+    resize: vertical;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.review-comment-section textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Submit Button */
+.review-submit-btn-new {
+    width: 100%;
+    padding: 1.1rem;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(to right, #6ee7b7, #93c5fd);
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+}
+
+.review-submit-btn-new:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+    filter: brightness(1.05);
+}

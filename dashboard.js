@@ -88,10 +88,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     let selectedContentType = 'facility';
 
     window.openContentModal = () => {
-        const overlay = document.getElementById('content-modal-overlay');
-        overlay.style.display = 'flex';
-        document.getElementById('nc-name').value = '';
-        document.getElementById('nc-desc').value = '';
+        document.getElementById('content-form').reset();
+        document.getElementById('content-modal-overlay').style.display = 'flex';
     };
 
     window.closeContentModal = () => {
@@ -129,7 +127,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const desc = document.getElementById('f-desc').value;
             const owner = document.getElementById('f-owner').value || 'Admin';
             const score = document.getElementById('f-score').value;
-            newItem = { name, city, category, address, phone, website, hours: `${openT}–${closeT}`, desc, owner, rating: score, status: 'Beklemede' };
+            const img = document.getElementById('f-image').value;
+            newItem = { _type: 'facility', name, city, category, address, phone, website, hours: `${openT}–${closeT}`, desc, owner, rating: score, status: 'Beklemede', image: img };
             notifBody = `${name} (${category}, ${city}) tesisi sisteme eklendi.`;
             mockFacilities.unshift(newItem);
             loadAllFacilitiesFromMock();
@@ -145,7 +144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const desc = document.getElementById('b-desc').value;
             const score = document.getElementById('b-score').value;
             const isPartner = document.getElementById('b-partner').value === '1';
-            newItem = { name, category: type, city: country || 'Türkiye', website, email, instagram, desc, owner: 'Marka', rating: score, status: isPartner ? 'Aktif' : 'Beklemede' };
+            newItem = { _type: 'brand', name, category: type, city: country || 'Türkiye', website, email, instagram, desc, owner: 'Marka', rating: score, status: isPartner ? 'Aktif' : 'Beklemede' };
             notifBody = `${name} (${type}) markası sisteme eklendi.`;
             mockFacilities.unshift(newItem);
             loadAllFacilitiesFromMock();
@@ -161,7 +160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const price = document.getElementById('e-price').value;
             const organizer = document.getElementById('e-organizer').value;
             const desc = document.getElementById('e-desc').value;
-            newItem = { name, category: type, city, address: `${location} – ${date} ${time}`, owner: organizer || 'Admin', rating: '8.0', status: 'Beklemede', price, capacity, desc };
+            newItem = { _type: 'event', name, category: type, city, address: `${location} – ${date} ${time}`, owner: organizer || 'Admin', rating: '8.0', status: 'Beklemede', price, capacity, desc };
             notifBody = `${name} (${type}, ${city}) etkinliği ${date} tarihli olarak eklendi.`;
             mockFacilities.unshift(newItem);
             loadAllFacilitiesFromMock();
@@ -178,17 +177,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ─── Edit Modal ────────────────────────────────────────────────────────
     window.openEditModal = (index) => {
-        const f = mockFacilities[index];
+        const idx = parseInt(index);
+        const f = mockFacilities[idx];
         if (!f) return;
-        document.getElementById('edit-index').value = index;
+        
+        const typeLabels = { facility: 'Tesis', brand: 'Marka', event: 'Etkinlik' };
+        document.getElementById('edit-modal-title').textContent = `${typeLabels[f._type] || 'İçerik'} Düzenle`;
+        
+        document.getElementById('edit-index').value = idx;
         document.getElementById('edit-name').value = f.name || '';
-        const catSel = document.getElementById('edit-category');
-        [...catSel.options].forEach(o => o.selected = o.value === f.category);
-        const citySel = document.getElementById('edit-city');
-        [...citySel.options].forEach(o => o.selected = o.value === f.city);
+        document.getElementById('edit-category').value = f.category || '';
+        document.getElementById('edit-city').value = f.city || '';
         document.getElementById('edit-score').value = f.rating || 7.5;
-        const statusSel = document.getElementById('edit-status');
-        [...statusSel.options].forEach(o => o.selected = o.value === f.status);
+        document.getElementById('edit-status').value = f.status || 'Aktif';
+
+        // Facility extra fields
+        const extra = document.getElementById('edit-facility-extra');
+        if (f._type === 'facility') {
+            extra.style.display = 'grid';
+            document.getElementById('edit-phone').value = f.phone || '';
+            document.getElementById('edit-desc').value = f.desc || '';
+            document.getElementById('edit-image').value = f.image || '';
+            if (f.hours && f.hours.includes('–')) {
+                const [o, c] = f.hours.split('–');
+                document.getElementById('edit-open').value = o.trim();
+                document.getElementById('edit-close').value = c.trim();
+            } else {
+                document.getElementById('edit-open').value = '09:00';
+                document.getElementById('edit-close').value = '22:00';
+            }
+        } else {
+            extra.style.display = 'none';
+        }
+
         document.getElementById('edit-modal-overlay').style.display = 'flex';
     };
 
@@ -200,16 +221,59 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
         const idx = parseInt(document.getElementById('edit-index').value);
         if (isNaN(idx) || !mockFacilities[idx]) return;
-        mockFacilities[idx].name = document.getElementById('edit-name').value;
-        mockFacilities[idx].category = document.getElementById('edit-category').value;
-        mockFacilities[idx].city = document.getElementById('edit-city').value;
-        mockFacilities[idx].rating = document.getElementById('edit-score').value;
-        mockFacilities[idx].status = document.getElementById('edit-status').value;
+        
+        const f = mockFacilities[idx];
+        f.name = document.getElementById('edit-name').value;
+        f.category = document.getElementById('edit-category').value;
+        f.city = document.getElementById('edit-city').value;
+        f.rating = document.getElementById('edit-score').value;
+        f.status = document.getElementById('edit-status').value;
+        
+        if (f._type === 'facility') {
+            f.phone = document.getElementById('edit-phone').value;
+            f.desc = document.getElementById('edit-desc').value;
+            f.image = document.getElementById('edit-image').value;
+            const openT = document.getElementById('edit-open').value;
+            const closeT = document.getElementById('edit-close').value;
+            f.hours = `${openT}–${closeT}`;
+        }
+        
         loadAllFacilitiesFromMock();
         loadRecentFacilities();
         document.getElementById('edit-modal-overlay').style.display = 'none';
-        showToast(`"${mockFacilities[idx].name}" güncellendi!`);
+        showToast(`"${f.name}" başarıyla güncellendi!`);
     };
+
+    // ─── User Edit Modal ───────────────────────────────────────────────────
+    window.openUserEditModal = (userId) => {
+        const u = allUsers.find(x => String(x.id) === String(userId));
+        if (!u) return;
+        document.getElementById('edit-user-id').value = u.id;
+        document.getElementById('edit-user-name').value = u.name;
+        document.getElementById('edit-user-role').value = u.role;
+        document.getElementById('edit-user-points').value = u.points || 0;
+        document.getElementById('edit-user-modal-overlay').style.display = 'flex';
+    };
+
+    window.closeUserEditModal = () => {
+        document.getElementById('edit-user-modal-overlay').style.display = 'none';
+    };
+
+    window.submitUserEdit = (e) => {
+        e.preventDefault();
+        const id = document.getElementById('edit-user-id').value;
+        const uIdx = allUsers.findIndex(x => String(x.id) === String(id));
+        if (uIdx === -1) return;
+
+        allUsers[uIdx].name = document.getElementById('edit-user-name').value;
+        allUsers[uIdx].role = document.getElementById('edit-user-role').value;
+        allUsers[uIdx].points = parseInt(document.getElementById('edit-user-points').value) || 0;
+
+        renderUserTable(allUsers);
+        closeUserEditModal();
+        showToast(`${allUsers[uIdx].name} bilgileri güncellendi!`);
+    };
+
 
 
     // ─── Global Search ─────────────────────────────────────────────────────
@@ -249,6 +313,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // On load, restore settings
     const saved = JSON.parse(localStorage.getItem('sporpuan_settings') || '{}');
     if (saved.siteName && document.getElementById('setting-site-name')) document.getElementById('setting-site-name').value = saved.siteName;
+    if (saved.autoPending !== undefined && document.getElementById('setting-auto-pending')) document.getElementById('setting-auto-pending').checked = saved.autoPending;
+    if (saved.emailNotif !== undefined && document.getElementById('setting-email-notif')) document.getElementById('setting-email-notif').checked = saved.emailNotif;
+    if (saved.qrActive !== undefined && document.getElementById('setting-qr-active')) document.getElementById('setting-qr-active').checked = saved.qrActive;
+    if (saved.facPts && document.getElementById('setting-facility-pts')) document.getElementById('setting-facility-pts').value = saved.facPts;
+    if (saved.evtPts && document.getElementById('setting-event-pts')) document.getElementById('setting-event-pts').value = saved.evtPts;
 
     // ─── Tab Navigation ────────────────────────────────────────────────────
     const tabTitles = {
@@ -293,34 +362,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const res = await fetch('http://localhost:8001/api/admin/stats');
             const data = await res.json();
-            document.getElementById('stat-users').textContent = data.totalUsers || 1;
-            document.getElementById('stat-reviews').textContent = data.totalReviews || 6;
-            document.getElementById('stat-complaints').textContent = data.commentComplaints || 0;
-            document.getElementById('pending-comments-badge').textContent = data.pendingComments || 2;
+            document.getElementById('stat-users').textContent = Math.max(data.totalUsers || 1, allUsers.length);
+            document.getElementById('stat-reviews').textContent = Math.max(data.totalReviews || 6, mockReviews.length);
+            document.getElementById('stat-facilities').textContent = mockFacilities.length;
+            
+            const pendingReviews = mockReviews.filter(r => r.status === 'Beklemede').length;
+            document.getElementById('pending-comments-badge').textContent = pendingReviews;
 
-            // QR points - sum from users
-            const usersRes = await fetch('http://localhost:8001/api/admin/users');
-            const users = await usersRes.json();
-            const totalPts = users.reduce((s, u) => s + (u.points || 0), 0);
-            document.getElementById('stat-facilities').textContent = 6;
-            document.getElementById('stat-qr-points') && (document.getElementById('stat-qr-points').textContent = totalPts);
+            const totalPts = allUsers.reduce((s, u) => s + (u.points || 0), 0);
+            if (document.getElementById('stat-qr-points')) document.getElementById('stat-qr-points').textContent = totalPts;
         } catch (e) {
-            document.getElementById('stat-users').textContent = 1;
-            document.getElementById('stat-facilities').textContent = 6;
-            document.getElementById('stat-reviews').textContent = 6;
-            document.getElementById('stat-complaints').textContent = 0;
-            if (document.getElementById('stat-qr-points')) document.getElementById('stat-qr-points').textContent = 60;
+            document.getElementById('stat-users').textContent = allUsers.length;
+            document.getElementById('stat-facilities').textContent = mockFacilities.length;
+            document.getElementById('stat-reviews').textContent = mockReviews.length;
+            if (document.getElementById('stat-qr-points')) {
+               const totalPts = allUsers.reduce((s, u) => s + (u.points || 0), 0);
+               document.getElementById('stat-qr-points').textContent = totalPts;
+            }
         }
     }
 
+
     // ─── Recent Facilities ─────────────────────────────────────────────────
     const mockFacilities = [
-        { name: 'Bursa Spor Merkezi', city: 'Bursa', status: 'Aktif', category: 'Spor Salonu', owner: 'Admin', rating: '8.5' },
-        { name: 'Kadıköy Basketbol', city: 'İstanbul', status: 'Aktif', category: 'Açık Saha', owner: 'Admin', rating: '7.8' },
-        { name: 'İzmir Tenis Akademisi', city: 'İzmir', status: 'Beklemede', category: 'Tenis Kortu', owner: 'Partner', rating: '8.8' },
-        { name: 'Ankara Olimpik Havuzu', city: 'Ankara', status: 'Aktif', category: 'Yüzme Havuzu', owner: 'Admin', rating: '9.2' },
-        { name: 'Antalya Outdoor Yaşam', city: 'Antalya', status: 'Aktif', category: 'Outdoor', owner: 'Partner', rating: '9.0' },
-        { name: 'Trabzon Fitness Center', city: 'Trabzon', status: 'Aktif', category: 'Fitness', owner: 'Partner', rating: '8.1' },
+        { _type: 'facility', name: 'Bursa Spor Merkezi', city: 'Bursa', status: 'Aktif', category: 'Spor Salonu', owner: 'Admin', rating: '8.5' },
+        { _type: 'facility', name: 'Kadıköy Basketbol', city: 'İstanbul', status: 'Aktif', category: 'Açık Saha', owner: 'Admin', rating: '7.8' },
+        { _type: 'facility', name: 'İzmir Tenis Akademisi', city: 'İzmir', status: 'Beklemede', category: 'Tenis Kortu', owner: 'Partner', rating: '8.8' },
+        { _type: 'brand', name: 'Nike Türkiye', city: 'İstanbul', status: 'Aktif', category: 'Spor Giyim', owner: 'Marka', rating: '9.5' },
+        { _type: 'brand', name: 'Adidas Academy', city: 'Ankara', status: 'Aktif', category: 'Ayakkabı', owner: 'Marka', rating: '9.2' },
+        { _type: 'event', name: 'İstanbul Maratonu', city: 'İstanbul', status: 'Yaklaşan', category: 'Maraton', owner: 'İBB', rating: '9.0' },
+        { _type: 'event', name: 'Bursa Bisiklet Turu', city: 'Bursa', status: 'Beklemede', category: 'Festival', owner: 'Bursa Bel.', rating: '8.2' },
+        { _type: 'facility', name: 'Antalya Outdoor Yaşam', city: 'Antalya', status: 'Aktif', category: 'Outdoor', owner: 'Partner', rating: '9.0' },
+        { _type: 'facility', name: 'Trabzon Fitness Center', city: 'Trabzon', status: 'Aktif', category: 'Fitness', owner: 'Partner', rating: '8.1' },
     ];
 
     function loadRecentFacilities() {
@@ -405,13 +478,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td><strong style="color:#10b981;">${u.points || 0} 🏅</strong></td>
                 <td>${u.regDate || '16.02.2026'}</td>
                 <td>
-                    <button class="btn-icon" title="Düzenle" onclick="showToast('Kullanıcı düzenleme yakında!')">
+                    <button class="btn-icon" title="Düzenle" onclick="openUserEditModal('${u.id}')">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                     </button>
                     <button class="btn-icon danger" title="Sil" onclick="deleteUser('${u.id}')">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </button>
                 </td>
+
             </tr>
         `).join('');
     }
@@ -438,27 +512,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // ─── All Facilities tab ────────────────────────────────────────────────
-    function loadAllFacilitiesFromMock() {
+    function loadAllFacilitiesFromMock(data = null) {
         const tbody = document.getElementById('table-all-facilities');
         if (!tbody) return;
-        tbody.innerHTML = mockFacilities.map((f, i) => `
-            <tr>
-                <td><div class="flex-col"><strong>${f.name}</strong><span class="small-lbl">Sahibi: ${f.owner}</span></div></td>
-                <td>${f.category}</td>
-                <td>${f.city}</td>
-                <td><strong>⭐ ${parseFloat(f.rating).toFixed(1)}</strong></td>
-                <td><span class="status-badge ${f.status === 'Aktif' ? 'active' : 'pending'}">${f.status}</span></td>
-                <td>
-                    <button class="btn-icon" title="Düzenle" onclick="openEditModal(${i})">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    </button>
-                    <button class="btn-icon danger" title="Kaldır" onclick="removeFacility(${i})">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
+        const displayData = data || mockFacilities;
+        tbody.innerHTML = displayData.map((f, i) => {
+            // Find real index for editing if filtered
+            const realIdx = mockFacilities.indexOf(f);
+            return `
+                <tr>
+                    <td><div class="flex-col"><strong>${f.name}</strong><span class="small-lbl">Sahibi: ${f.owner}</span></div></td>
+                    <td>${f.category}</td>
+                    <td>${f.city}</td>
+                    <td><strong>⭐ ${parseFloat(f.rating).toFixed(1)}</strong></td>
+                    <td><span class="status-badge ${f.status === 'Aktif' ? 'active' : 'pending'}">${f.status}</span></td>
+                    <td>
+                        <button class="btn-icon" title="Düzenle" onclick="openEditModal(${realIdx})">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                        <button class="btn-icon danger" title="Kaldır" onclick="removeFacility(${realIdx})">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     }
+
 
     window.removeFacility = (i) => {
         if (!confirm(`"${mockFacilities[i].name}" tesisini kaldırmak istediğinize emin misiniz?`)) return;
@@ -471,31 +551,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     window.filterFacilityTable = (query) => {
         const q = (query || '').toLowerCase();
-        const tbody = document.getElementById('table-all-facilities');
-        if (!tbody) return;
-        const filtered = mockFacilities.filter(f =>
-            f.name.toLowerCase().includes(q) || f.city.toLowerCase().includes(q)
-        );
-        loadAllFacilitiesFromMock();
-        // Re-render with filtered
-        tbody.innerHTML = filtered.map((f, i) => `
-            <tr>
-                <td><div class="flex-col"><strong>${f.name}</strong><span class="small-lbl">Sahibi: ${f.owner}</span></div></td>
-                <td>${f.category}</td>
-                <td>${f.city}</td>
-                <td><strong>⭐ ${parseFloat(f.rating).toFixed(1)}</strong></td>
-                <td><span class="status-badge ${f.status === 'Aktif' ? 'active' : 'pending'}">${f.status}</span></td>
-                <td>
-                    <button class="btn-icon" title="Düzenle" onclick="showToast('Düzenleme yakında!')">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    </button>
-                    <button class="btn-icon danger" title="Kaldır" onclick="removeFacility(${i})">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
+        const typeFilter = document.getElementById('facility-type-filter')?.value || '';
+        
+        const filtered = mockFacilities.filter(f => {
+            const matchesSearch = f.name.toLowerCase().includes(q) || f.city.toLowerCase().includes(q);
+            const matchesType = !typeFilter || f._type === typeFilter || 
+                                (typeFilter === 'facility' && !f._type); // Fallback for legacy mock
+            return matchesSearch && matchesType;
+        });
+        
+        loadAllFacilitiesFromMock(filtered);
     };
+
 
     // ─── All Reviews tab ───────────────────────────────────────────────────
     function loadAllReviews(statusFilter = '') {

@@ -266,11 +266,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }).addTo(_exploreMap);
         }
 
-        const scoreIcon = (score) => L.divIcon({
-            className: '',
-            html: `<div style="background:var(--sporpuan-navy,#0f172a);color:#fff;font-family:Inter,sans-serif;font-size:12px;font-weight:800;padding:5px 10px;border-radius:20px;white-space:nowrap;box-shadow:0 4px 12px rgba(15,23,42,.3);border:2px solid #fff;">${score}</div>`,
-            iconAnchor: [24, 16]
-        });
+        const scoreIcon = (score) => {
+            const s = parseFloat(score);
+            let bgColor = '#0f172a'; // Default navy
+            if (s >= 8.5) bgColor = '#10b981'; // Green
+            else if (s >= 7.0) bgColor = '#3b82f6'; // Blue
+            else if (s >= 5.0) bgColor = '#f59e0b'; // Orange
+            else bgColor = '#ef4444'; // Red
+
+            return L.divIcon({
+                className: '',
+                html: `<div style="background:${bgColor};color:#fff;font-family:Inter,sans-serif;font-size:12px;font-weight:800;padding:5px 10px;border-radius:20px;white-space:nowrap;box-shadow:0 4px 12px rgba(15,23,42,.3);border:2px solid #fff;">${score}</div>`,
+                iconAnchor: [24, 16]
+            });
+        };
 
         data.forEach(item => {
             const coords = CITY_COORDS[item.city];
@@ -1490,6 +1499,66 @@ document.addEventListener('DOMContentLoaded', () => {
     // (Old showHome removed - consolidated at bottom)
     window.showHome = showHome;
 
+    // --- New Review Modal Interaction ---
+    const reviewSliders = document.querySelectorAll('.rating-slider');
+    const recBtns = document.querySelectorAll('.rec-btn');
+    const closeReviewBtn = document.getElementById('close-review-modal');
+
+    function updateSliderProgress(slider) {
+        const val = parseFloat(slider.value);
+        const name = slider.name;
+        const valDisplay = document.getElementById(`val-${name}`);
+        if (valDisplay) valDisplay.innerText = `${val}/10`;
+        
+        const fill = slider.parentElement.querySelector('.slider-track-fill');
+        if (fill) {
+            fill.style.width = `${(val / 10) * 100}%`;
+            // Dynamic color matching the map markers
+            if (val >= 8.5) fill.style.background = '#10b981'; // Green
+            else if (val >= 7.0) fill.style.background = '#3b82f6'; // Blue
+            else if (val >= 5.0) fill.style.background = '#f59e0b'; // Orange
+            else fill.style.background = '#ef4444'; // Red
+        }
+    }
+
+    reviewSliders.forEach(slider => {
+        slider.addEventListener('input', () => updateSliderProgress(slider));
+    });
+
+    recBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            recBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const val = btn.dataset.val;
+            document.getElementById('input-recommendation').value = val;
+            
+            // Update badge text for visual feedback
+            const badge = document.getElementById('recommend-badge');
+            if (badge) {
+                if (val === 'yes') { badge.innerText = '%100 Tavsiye'; badge.style.background = '#dcfce7'; badge.style.color = '#10b981'; }
+                else if (val === 'maybe') { badge.innerText = '%50 Tavsiye'; badge.style.background = '#fef3c7'; badge.style.color = '#d97706'; }
+                else { badge.innerText = '%0 Tavsiye'; badge.style.background = '#fee2e2'; badge.style.color = '#ef4444'; }
+            }
+        });
+    });
+
+    if (closeReviewBtn) {
+        closeReviewBtn.onclick = () => closeModal(reviewModal);
+    }
+
+    function resetReviewModal() {
+        if (!reviewForm) return;
+        reviewForm.reset();
+        reviewSliders.forEach(slider => updateSliderProgress(slider));
+        recBtns.forEach(btn => btn.classList.remove('active'));
+        const maybeBtn = document.querySelector('.rec-btn[data-val="maybe"]');
+        if (maybeBtn) maybeBtn.classList.add('active');
+        document.getElementById('input-recommendation').value = 'maybe';
+        document.getElementById('recommend-badge').innerText = '%100 Tavsiye'; // Resetting to default as per image
+    }
+
+    // (Merged into one instance below)
+
     function showExplore() {
         showView('explore-view');
         // Leaflet needs a moment after the div becomes visible to recalculate tile positions
@@ -1498,72 +1567,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 200);
     }
     window.showExplore = showExplore;
-
-
-
-    // --- Review Modal Stepper & Stars ---
-    const rmNextBtn = document.querySelector('.next-step-btn');
-    const rmPrevBtn = document.querySelector('.prev-step-btn');
-    const rmStep1 = document.querySelector('.review-step-1');
-    const rmStep2 = document.querySelector('.review-step-2');
-
-    if (rmNextBtn) {
-        rmNextBtn.onclick = () => {
-            if (rmStep1 && rmStep2) {
-                rmStep1.classList.remove('active'); rmStep1.style.display = 'none';
-                rmStep2.classList.add('active'); rmStep2.style.display = 'block';
-            }
-        };
-    }
-    if (rmPrevBtn) {
-        rmPrevBtn.onclick = () => {
-            if (rmStep1 && rmStep2) {
-                rmStep2.classList.remove('active'); rmStep2.style.display = 'none';
-                rmStep1.classList.add('active'); rmStep1.style.display = 'block';
-            }
-        };
-    }
-
-    const starUnits = document.querySelectorAll('.star-unit');
-    starUnits.forEach(star => {
-        star.addEventListener('click', () => {
-            const row = star.closest('.rr-stars');
-            const val = parseInt(star.dataset.val);
-            row.querySelectorAll('.star-unit').forEach(s => {
-                if (parseInt(s.dataset.val) <= val) s.classList.add('active');
-                else s.classList.remove('active');
-            });
-            updateCalculatedScore();
-        });
-    });
-
-    function updateCalculatedScore() {
-        const rows = document.querySelectorAll('.rr-stars');
-        let total = 0, count = 0;
-        rows.forEach(row => {
-            const active = row.querySelectorAll('.star-unit.active');
-            if (active.length > 0) { total += active.length; count++; }
-        });
-        const avg = count > 0 ? (total / count).toFixed(1) : '0.0';
-        const scoreDisplay = document.getElementById('rm-calc-score');
-        if (scoreDisplay) scoreDisplay.innerText = avg;
-    }
-
-    function resetReviewModal() {
-        if (!rmStep1 || !rmStep2) return;
-        rmStep1.classList.add('active'); rmStep1.style.display = 'block';
-        rmStep2.classList.remove('active'); rmStep2.style.display = 'none';
-        starUnits.forEach(s => s.classList.remove('active'));
-        updateCalculatedScore();
-        const sentimentDefault = document.querySelector('input[name="sentiment"][value="3"]');
-        if (sentimentDefault) sentimentDefault.checked = true;
-        if (reviewForm) { const ta = reviewForm.querySelector('textarea'); if (ta) ta.value = ''; }
-    }
-
-    // Sentiment Emoji
-    document.querySelectorAll('input[name="sentiment"]').forEach(input => {
-        input.addEventListener('change', () => showToast('Hissiyatınız kaydedildi.'));
-    });
 
     // Review submit
     if (reviewForm) {
@@ -1574,7 +1577,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Extend openModal for resets
     const originalOpenModal = openModal;
     window.openModal = function(modal) {
         if (modal && modal.id === 'review-modal') resetReviewModal();
