@@ -48,9 +48,16 @@
                 <img src="sporpuan_logo_new.png" alt="Sporpuan Logo" style="height: 48px; width: 48px; object-fit: contain;">
                 <span class="logo-text">Sporpuan</span>
             </div>
-            <nav class="header-nav" style="justify-content: flex-end; width: 100%;">
+            <div class="header-right" style="display:flex; align-items:center; gap:1.2rem; flex:1; justify-content:flex-end;">
+                <nav class="header-nav desktop-only" style="display:flex; align-items:center; gap:1.5rem;">
+                    <a href="#kesfet" onclick="switchView('explore', 'all')" style="text-decoration:none; color:var(--sporpuan-navy); font-weight:600;">Keşfet</a>
+                    <a href="#tesisler" onclick="switchView('explore', 'facility')" style="text-decoration:none; color:var(--sporpuan-navy); font-weight:600;">Tesisler</a>
+                    <a href="#markalar" onclick="switchView('explore', 'brand')" style="text-decoration:none; color:var(--sporpuan-navy); font-weight:600;">Markalar</a>
+                </nav>
+
+                <div class="header-user" id="open-login-btn" style="position: relative; display:flex; align-items:center; gap:0.5rem;">
                     <!-- Mobile Menu Toggle Button -->
-                    <button class="mobile-menu-toggle" id="mobile-menu-btn" style="display:none; background:none; border:none; padding:8px; cursor:pointer; color:var(--sporpuan-navy); margin-right: 1rem;">
+                    <button class="mobile-menu-toggle" id="mobile-menu-btn" style="display:none; background:none; border:none; padding:8px; cursor:pointer; color:var(--sporpuan-navy);">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                     </button>
 
@@ -60,14 +67,16 @@
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
-                        <span>Giriş Yap / Üye Ol</span>
+                        <span class="desktop-only" style="white-space:nowrap;">Giriş Yap / Üye Ol</span>
                     </div>
+                </div>
+            </div>
 
                     <!-- Logged In State (Hidden initially) -->
                     <div id="user-logged-in" style="display: none; align-items: center; gap: 0.8rem;">
                         <img src="" alt="User Avatar" class="user-avatar" id="avatar-img">
-                        <span class="user-name" id="avatar-name">Kullanıcı</span>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="user-chevron" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <span class="user-name desktop-only" id="avatar-name">Kullanıcı</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="user-chevron desktop-only" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                     </div>

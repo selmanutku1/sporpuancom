@@ -30,6 +30,10 @@ body {
 body.modal-open { overflow: hidden; }
 
 .app-container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+.desktop-only { display: block; }
+@media (max-width: 900px) {
+    .desktop-only { display: none !important; }
+}
 
 /* HOME VIEW LAYOUT */
 #home-view {
@@ -4137,5 +4141,23 @@ body.is-home .recent-reviews-container {
         flex-direction: column;
         align-items: center;
         gap: 1rem;
+    }
+}
+
+/* Home View Overflow Fix for Mobile */
+@media (max-width: 900px) {
+    body.is-home {
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
+    }
+    body.is-home .hero-section {
+        height: auto;
+        min-height: 400px;
+        padding: 4rem 1.5rem;
+    }
+    body.is-home .integrated-reviews {
+        position: static;
+        margin-top: 2rem;
     }
 }
