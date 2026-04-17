@@ -155,6 +155,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     processAuth('Partner', email, 'partner', 'Partner Firma');
                 });
             }
+
+            // Demo Login Button
+            const demoLoginBtn = document.getElementById('demo-login-btn');
+            if (demoLoginBtn) {
+                demoLoginBtn.addEventListener('click', () => {
+                    closeModal(loginModal);
+                    processAuth('Demo Kullanıcı', 'demo@sporpuan.com', 'admin');
+                    showToast('Demo hesabıyla giriş yapıldı! 🎉');
+                });
+            }
         } catch (err) {
             console.error("Form Handler Attachment Error:", err);
         }
@@ -1755,12 +1765,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
     renderAdminTable();
 
-    // AUTO-LOGIN AS ADMIN FOR DASHBOARD DIRECT ACCESS
-    if (window.processAuth) {
-        window.processAuth('Admin', 'admin@sporpuan.com', 'admin');
-    } else {
-        showHome();
-    }
+    // Start on home page without auto-login
+    showHome();
 
     // --- QR Scanner Module Logic ---
     const qrScanBtn = document.getElementById('qr-scan-btn');
