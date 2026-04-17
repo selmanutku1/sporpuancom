@@ -360,7 +360,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ─── Stats Load ────────────────────────────────────────────────────────
     async function loadStats() {
         try {
-            const res = await fetch('http://localhost:8001/api/admin/stats');
+            const res = await fetch('/api/admin/stats');
             const data = await res.json();
             document.getElementById('stat-users').textContent = Math.max(data.totalUsers || 1, allUsers.length);
             document.getElementById('stat-reviews').textContent = Math.max(data.totalReviews || 6, mockReviews.length);
@@ -459,7 +459,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadAllUsers() {
         try {
-            const res = await fetch('http://localhost:8001/api/admin/users');
+            const res = await fetch('/api/admin/users');
             allUsers = await res.json();
         } catch {
             allUsers = [{ id: 1, name: 'Selman Utku', email: 'selmanutkumarmara@gmail.com', role: 'Admin', points: 0, regDate: '01.01.2026' }];
@@ -503,7 +503,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.deleteUser = async (id) => {
         if (!confirm('Kullanıcıyı silmek istediğinize emin misiniz?')) return;
         try {
-            await fetch(`http://localhost:8001/api/admin/delete-user/${id}`, { method: 'DELETE' });
+            await fetch(`/api/admin/delete-user/${id}`, { method: 'DELETE' });
         } catch { /* offline */ }
         allUsers = allUsers.filter(u => String(u.id) !== String(id));
         renderUserTable(allUsers);

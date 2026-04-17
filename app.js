@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         loader.style.display = 'block';
         try {
-            const BASE_URL = 'http://localhost:8001'; 
+            const BASE_URL = ''; 
             const response = await fetch(`${BASE_URL}/api-proxy/apps/6985f22c3c8f22b3fb4a56dd/entities/Facility`, {
                 headers: {
                     'api_key': '4872e004cafc4b86a092e1d48b466f84',
@@ -2003,7 +2003,7 @@ document.addEventListener('DOMContentLoaded', () => {
             qrScanBtn.textContent = 'Taranıyor...';
             
             try {
-                const res = await fetch('http://localhost:8001/api/qr/scan', {
+                const res = await fetch('/api/qr/scan', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ qrCode: code, email: userData.email || 'user@sporpuan.com' })
