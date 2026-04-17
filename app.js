@@ -178,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 errorMsg.innerHTML = "Tesis bulunamadı.";
             } else {
                 renderFacilities(facilitiesData);
+                initExploreMap(facilitiesData);
             }
         } catch (error) {
             console.warn('API Error, using fallback data:', error);
@@ -226,10 +227,79 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             ];
             renderFacilities(facilitiesData);
+            initExploreMap(facilitiesData);
         } finally {
             loader.style.display = 'none';
             errorMsg.style.display = 'none';
         }
+    }
+
+    // --- LEAFLET EXPLORE MAP ---
+    let _exploreMap = null;
+
+    const CITY_COORDS = {
+        'Bursa':     [40.1885, 29.0610],
+        'İstanbul':  [41.0082, 28.9784],
+        'Ankara':    [39.9334, 32.8597],
+        'İzmir':     [38.4192, 27.1287],
+        'Antalya':   [36.8969, 30.7133],
+        'Trabzon':   [41.0015, 39.7178],
+        'Konya':     [37.8747, 32.4932],
+        'Adana':     [37.0000, 35.3213],
+        'Dünya Geneli': [39.0, 35.0]
+    };
+
+    function initExploreMap(data) {
+        if (typeof L === 'undefined') return;
+        const mapEl = document.getElementById('explore-map');
+        if (!mapEl) return;
+
+        // Initialize only once
+        if (_exploreMap) {
+            _exploreMap.eachLayer(l => { if (l instanceof L.Marker) _exploreMap.removeLayer(l); });
+        } else {
+            _exploreMap = L.map('explore-map', { zoomControl: true, scrollWheelZoom: false }).setView([39.0, 35.0], 6);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 18
+            }).addTo(_exploreMap);
+        }
+
+        const scoreIcon = (score) => L.divIcon({
+            className: '',
+            html: `<div style="background:var(--sporpuan-navy,#0f172a);color:#fff;font-family:Inter,sans-serif;font-size:12px;font-weight:800;padding:5px 10px;border-radius:20px;white-space:nowrap;box-shadow:0 4px 12px rgba(15,23,42,.3);border:2px solid #fff;">${score}</div>`,
+            iconAnchor: [24, 16]
+        });
+
+        data.forEach(item => {
+            const coords = CITY_COORDS[item.city];
+            if (!coords) return;
+            // Jitter so markers in same city don't stack
+            const jitter = [(Math.random() - 0.5) * 0.25, (Math.random() - 0.5) * 0.25];
+            const pos = [coords[0] + jitter[0], coords[1] + jitter[1]];
+            const score = (item.sporpuan_score || 0).toFixed(1);
+
+            const marker = L.marker(pos, { icon: scoreIcon(score) }).addTo(_exploreMap);
+            marker.bindPopup(`
+                <div style="font-family:Inter,sans-serif;min-width:200px;">
+                    <div style="font-size:0.75rem;color:#64748b;margin-bottom:4px;">${item.category_name || 'Spor Tesisi'}</div>
+                    <div style="font-weight:800;font-size:1rem;color:#0f172a;margin-bottom:6px;">${item.name}</div>
+                    <div style="font-size:0.8rem;color:#475569;margin-bottom:8px;">${item.address || item.city}</div>
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+                        <span style="background:#0f172a;color:#fff;padding:3px 10px;border-radius:12px;font-weight:900;font-size:0.9rem;">${score}</span>
+                        <span style="color:#64748b;font-size:0.78rem;">${item.total_reviews || 0} değerlendirme</span>
+                    </div>
+                    <button onclick="window._mapShowDetail('${item.id}')" style="width:100%;background:#0f172a;color:#fff;border:none;border-radius:8px;padding:8px;font-weight:700;cursor:pointer;font-size:0.8rem;">Detay Görüntüle →</button>
+                </div>
+            `, { maxWidth: 260 });
+        });
+
+        // Global callback from popup button
+        window._mapShowDetail = (id) => {
+            const item = (facilitiesData || []).find(f => f.id === id);
+            if (item && typeof showDetailsLayout === 'function') showDetailsLayout(item);
+        };
     }
 
     // --- EXPLORE FILTERS LOGIC ---
@@ -1422,6 +1492,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showExplore() {
         showView('explore-view');
+        // Leaflet needs a moment after the div becomes visible to recalculate tile positions
+        setTimeout(() => {
+            if (_exploreMap) _exploreMap.invalidateSize();
+        }, 200);
     }
     window.showExplore = showExplore;
 

@@ -22,6 +22,9 @@
     <link rel="icon" href="sporpuan_logo_new.png">
     
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@200;400;800&display=swap" rel="stylesheet">
+    <!-- Leaflet JS Map Engine -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="stylesheet" href="style.css">
     <!-- Google Identity Services (GSI) Client Library -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -259,12 +262,10 @@
     <!-- EXPLORE VIEW -->
     <div id="explore-view" style="display: none;">
         <main class="app-container">
-            <!-- MINIMAL EXPLORE HEADER (Replaces Banner) -->
-            <header class="explore-minimal-header">
-                <h1>Spor Dünyasını <span class="text-highlight">Keşfet</span></h1>
-                <p>Türkiye'nin en kapsamlı spor platformunda binlerce tesis, marka ve etkinliği inceleyin.</p>
-            </header>
-
+            <!-- DYNAMIC MAP INTEGRATION (Replaces Banner) -->
+            <div id="explore-map-container" style="width:100%; height:450px; border-radius:24px; box-shadow:0 10px 30px rgba(15,23,42,0.1); margin-top:2rem; margin-bottom: 2rem; overflow:hidden; z-index:1; position:relative; background:#f1f5f9;">
+                <div id="explore-map" style="width:100%; height:100%;"></div>
+            </div>
 
             <div class="explore-layout">
                 <!-- Sol Filtre Çubuğu -->
