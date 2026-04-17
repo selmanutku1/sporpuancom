@@ -1458,13 +1458,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Redirection
             if (role === 'admin') {
-                showView('dashboard-view');
+                switchView('dashboard-view');
                 renderDashboardData();
             } else if (role === 'partner') {
-                showView('partner-dashboard-view');
+                switchView('partner-dashboard-view');
                 renderPartnerDashboard();
             } else {
-                showView('profile-view');
+                switchView('profile-view');
                 renderProfileData();
             }
             
@@ -1855,7 +1855,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const updAdminBtn = document.getElementById('upd-admin-btn');
     if (updAdminBtn) updAdminBtn.onclick = () => {
         if(profileDropdown) profileDropdown.classList.remove('active');
-        showView('dashboard-view');
+        switchView('dashboard-view');
         renderDashboardData();
     };
     if (updFavsBtn) updFavsBtn.onclick = () => {
@@ -1936,7 +1936,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Original UI Toggles (Adjusted to showView) ---
     function showProfile() {
         if (!isLoggedIn) { openModal(loginModal); return; }
-        showView('profile-view');
+        switchView('profile-view');
         renderProfileData();
     }
     window.showProfile = showProfile;
@@ -2005,7 +2005,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // (Merged into one instance below)
 
     function showExplore() {
-        showView('explore-view');
+        switchView('explore-view');
         // Leaflet needs a moment after the div becomes visible to recalculate tile positions
         setTimeout(() => {
             if (_exploreMap) _exploreMap.invalidateSize();
