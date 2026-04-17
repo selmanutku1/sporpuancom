@@ -6,8 +6,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const pageTitle = document.getElementById('page-title');
     const views = {
         'overview': document.getElementById('content-overview'),
-        'users': document.getElementById('content-users')
+        'users': document.getElementById('content-users'),
+        'facilities': document.getElementById('content-facilities'),
+        'reviews': document.getElementById('content-reviews'),
+        'settings': document.getElementById('content-settings')
     };
+
+    // Sidebar Toggle
+    const sidebarToggleBtn = document.getElementById('sidebar-toggle');
+    const sidebar = document.querySelector('.dash-sidebar');
+    if (sidebarToggleBtn && sidebar) {
+        sidebarToggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+        });
+    }
 
     // Tab Navigation
     tabs.forEach(tab => {
@@ -115,9 +127,68 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    // Load All Facilities
+    async function loadAllFacilities() {
+        try {
+            const res = await fetch('http://localhost:8001/api/admin/tab-data');
+            const data = await res.json();
+            const tbody = document.getElementById('table-all-facilities');
+            if(!tbody) return;
+            
+            tbody.innerHTML = data.facilities.map(f => `
+                <tr>
+                    <td>
+                        <div class="flex-col">
+                            <strong>${f.name}</strong>
+                            <span class="small-lbl">Sahibi: ${f.owner}</span>
+                        </div>
+                    </td>
+                    <td>Tesis</td>
+                    <td>${f.city}</td>
+                    <td>⭐ ${parseFloat(f.rating).toFixed(1)}</td>
+                    <td><span class="status-badge ${f.status === 'Aktif' ? 'active' : 'pending'}">${f.status}</span></td>
+                    <td>
+                        <button class="btn-icon" title="Düzenle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                        <button class="btn-icon danger" title="Kaldır"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg></button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (e) {
+            console.error("Facilities Error", e);
+        }
+    }
+
+    // Load All Reviews
+    async function loadAllReviews() {
+        try {
+            const res = await fetch('http://localhost:8001/api/admin/tab-data');
+            const data = await res.json();
+            const tbody = document.getElementById('table-all-reviews');
+            if(!tbody) return;
+
+            tbody.innerHTML = data.comments.map(r => `
+                <tr>
+                    <td class="small-lbl">${r.date}</td>
+                    <td><strong>${r.user}</strong></td>
+                    <td>${r.facility}</td>
+                    <td><div style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${r.content}">${r.content}</div></td>
+                    <td><span class="status-badge ${r.status === 'Onaylı' ? 'active' : 'pending'}">${r.status}</span></td>
+                    <td>
+                        <button class="btn-icon" title="Onayla"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></button>
+                        <button class="btn-icon danger" title="Reddet"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (e) {
+            console.error("Reviews Error", e);
+        }
+    }
+
     // Initialize View Data
     loadStats();
     loadRecentFacilities();
     loadRecentReviews();
     loadAllUsers();
+    loadAllFacilities();
+    loadAllReviews();
 });

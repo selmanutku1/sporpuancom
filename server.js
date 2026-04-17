@@ -185,6 +185,26 @@ const handler = (req, res) => {
         return;
     }
 
+    if (req.url === '/api/admin/tab-data' && req.method === 'GET') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            facilities: [
+                { name: "Bursa Spor Merkezi", owner: "SporAŞ", city: "Bursa", rating: 8.4, status: "Aktif" },
+                { name: "Kadıköy Basketbol", owner: "İstanbul Belediyesi", city: "İstanbul", rating: 9.1, status: "Aktif" },
+                { name: "İzmir Tenis Akademisi", owner: "Özel", city: "İzmir", rating: 7.5, status: "Beklemede" },
+                { name: "MacFit Ataşehir", owner: "MacFit", city: "İstanbul", rating: 8.9, status: "Aktif" },
+                { name: "Ankara Yüzme Havuzu", owner: "Gençlik Spor", city: "Ankara", rating: 6.8, status: "Beklemede" }
+            ],
+            comments: [
+                { date: "16.02.2026", user: "Ahmet Y.", facility: "Kadıköy Basketbol", content: "Çok temiz ve güvenilir bir salon.", status: "Onaylı" },
+                { date: "15.02.2026", user: "Selin K.", facility: "Bursa Spor Merkezi", content: "Eğitmenler ilgisiz ve aletler çok eski.", status: "Beklemede" },
+                { date: "14.02.2026", user: "Mehmet T.", facility: "MacFit Ataşehir", content: "Harika bir deneyimdi, tebrikler.", status: "Onaylı" },
+                { date: "14.02.2026", user: "Zeynep S.", facility: "Ankara Yüzme Havuzu", content: "Su çok soğuktu, beğenmedim.", status: "Beklemede" }
+            ]
+        }));
+        return;
+    }
+
     if (req.url === '/api/admin/invite' && req.method === 'POST') {
         let body = '';
         req.on('data', chunk => { body += chunk.toString(); });

@@ -61,7 +61,10 @@
         <main class="dash-main">
             <!-- HEADER -->
             <header class="dash-topbar">
-                <div class="dt-title">
+                <div class="dt-title" style="display:flex; align-items:center; gap:1rem;">
+                    <button class="icon-btn" id="sidebar-toggle" title="Menüyü Daralt/Genişlet">
+                        <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                    </button>
                     <h1 id="page-title">Genel Bakış</h1>
                 </div>
                 <div class="dt-actions">
@@ -192,6 +195,90 @@
                                 <!-- Injected -->
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FACILITIES TAB -->
+            <div class="dash-content-wrapper" id="content-facilities" style="display: none;">
+                <div class="dt-panel flex-panel">
+                    <div class="dtp-header">
+                        <h3>Tesis ve Marka Yönetimi</h3>
+                        <div class="dtp-actions">
+                            <button class="primary-btn-sm" style="background:var(--sporpuan-green);">+ Tesis Ekle</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive flex-1">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Tesis/Marka Adı</th>
+                                    <th>Kategori</th>
+                                    <th>Şehir/Konum</th>
+                                    <th>Puan</th>
+                                    <th>Durum</th>
+                                    <th>İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-all-facilities">
+                                <!-- Injected -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REVIEWS TAB -->
+            <div class="dash-content-wrapper" id="content-reviews" style="display: none;">
+                <div class="dt-panel flex-panel">
+                    <div class="dtp-header">
+                        <h3>Kullanıcı Yorumları</h3>
+                        <div class="dtp-actions">
+                            <select class="dtp-select"><option>Bekleyenler</option><option>Onaylananlar</option><option>Reddedilenler</option></select>
+                        </div>
+                    </div>
+                    <div class="table-responsive flex-1">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Kullanıcı</th>
+                                    <th>Tesis</th>
+                                    <th>Yorum Metni</th>
+                                    <th>Durum</th>
+                                    <th>İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-all-reviews">
+                                <!-- Injected -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SETTINGS TAB -->
+            <div class="dash-content-wrapper" id="content-settings" style="display: none;">
+                <div class="dt-panel" style="max-width:800px; margin:0 auto; width:100%;">
+                    <div class="dtp-header">
+                        <h3>Sistem Ayarları</h3>
+                        <button class="primary-btn-sm">Kaydet</button>
+                    </div>
+                    <div style="padding:2rem;">
+                        <div style="margin-bottom:1.5rem;">
+                            <label style="display:block; font-size:0.9rem; font-weight:600; color:var(--text-muted); margin-bottom:0.5rem;">Site Adı</label>
+                            <input type="text" value="Sporpuan" style="width:100%; border:1px solid var(--border-color); border-radius:8px; padding:0.8rem; font-family:inherit;">
+                        </div>
+                        <div style="margin-bottom:1.5rem;">
+                            <label style="display:block; font-size:0.9rem; font-weight:600; color:var(--text-muted); margin-bottom:0.5rem;">Site Açıklaması (SEO)</label>
+                            <textarea style="width:100%; border:1px solid var(--border-color); border-radius:8px; padding:0.8rem; font-family:inherit; min-height:100px;">Türkiye'nin bağımsız spor platformu.</textarea>
+                        </div>
+                        <div>
+                            <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; font-weight:600; color:var(--text-main); cursor:pointer;">
+                                <input type="checkbox" checked style="width:18px;height:18px;accent-color:var(--sporpuan-green);">
+                                Yeni yorumlar otomatik olarak "Beklemede" durumuna düşsün
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
