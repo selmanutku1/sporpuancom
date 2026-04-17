@@ -374,76 +374,127 @@
 }
 textarea.fld-input { min-height: 80px; }
 
-/* Dashboard Responsive Overhaul */
+
+/* Dashboard Responsive Overhaul - Premium Mobile Experience */
 @media (max-width: 1024px) {
     .dash-sidebar {
         position: fixed;
-        left: -260px;
+        left: -280px;
         top: 0;
         bottom: 0;
-        transition: left 0.3s ease;
+        width: 280px;
+        box-shadow: 20px 0 50px rgba(0,0,0,0.1);
+        transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 2000;
     }
     .dash-sidebar.mobile-open {
         left: 0;
     }
-    .dash-layout {
-        overflow-x: hidden;
+    
+    /* Overlay for mobile sidebar */
+    .dash-sidebar.mobile-open::after {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(4px);
+        z-index: -1;
+        left: 280px;
+        width: 100vw;
+        height: 100vh;
     }
+
+    .dash-main {
+        width: 100%;
+    }
+
     .mobile-sidebar-toggle {
         display: flex !important;
-        align-items: center;
-        justify-content: center;
-        background: none;
-        border: none;
-        margin-right: 0.5rem;
-        cursor: pointer;
-        color: var(--dash-text);
+        background: var(--dash-bg);
+        border: 1px solid var(--dash-border);
+        border-radius: 10px;
+        margin-right: 0.75rem;
     }
+
     .desktop-only {
         display: none !important;
     }
-    .dash-topbar {
-        padding: 0 1rem;
-    }
+
     .dash-stats-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
     }
 }
 
 @media (max-width: 768px) {
+    .dash-topbar {
+        padding: 0 1rem;
+        height: 64px;
+    }
+
     .dash-content-wrapper {
         padding: 1rem;
+        gap: 1rem;
     }
+
     .dash-grid-2 {
         grid-template-columns: 1fr;
     }
+
     .dt-search {
-        display: none; /* Hide search on small mobile */
+        display: none;
+    }
+
+    .ds-card {
+        padding: 1rem;
+    }
+
+    .card-info .val {
+        font-size: 1.5rem;
+    }
+    
+    /* Force forms to 1 column */
+    div[style*="grid-template-columns:1fr 1fr"], 
+    div[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 480px) {
     .dash-stats-grid {
         grid-template-columns: 1fr;
     }
+
     .dt-title h1 {
+        font-size: 1rem;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .ds-logo span {
+        font-size: 1rem;
+    }
+
+    .ds-nav-item {
+        padding: 0.65rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    .primary-btn-sm {
+        padding: 0.5rem 0.75rem;
         font-size: 0.8rem;
     }
-    .primary-btn-sm span {
-        display: none;
-    }
-    .ds-card {
-        padding: 0.85rem;
-    }
-    .card-info .val {
-        font-size: 1.2rem;
-    }
-    .card-info .label {
-        font-size: 0.75rem;
-    }
-    .ds-nav-item {
-        padding: 0.6rem 0.8rem;
-        font-size: 0.85rem;
+
+    /* Modal box mobile adjustments */
+    #content-modal-box, 
+    #edit-modal-overlay > div,
+    #edit-user-modal-overlay > div {
+        width: 95% !important;
+        margin: 10px auto !important;
+        max-height: 90vh;
+        overflow-y: auto;
     }
 }
 

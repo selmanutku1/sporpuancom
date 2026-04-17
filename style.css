@@ -4161,3 +4161,26 @@ body.is-home .recent-reviews-container {
         margin-top: 2rem;
     }
 }
+
+/* Integrated Dashboard Responsive Styles */
+@media (max-width: 900px) {
+    #dashboard-view .dash-stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 1rem;
+    }
+    #dashboard-view .ds-card {
+        padding: 1rem;
+    }
+    #dashboard-view .card-info .val {
+        font-size: 1.4rem;
+    }
+}
+
+@media (max-width: 600px) {
+    #dashboard-view .dash-stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+    #dashboard-view .dash-grid-2 {
+        grid-template-columns: 1fr !important;
+    }
+}

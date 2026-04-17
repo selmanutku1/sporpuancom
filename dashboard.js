@@ -2,7 +2,41 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
 
-    // ─── CSS inject for content-type buttons & notification items ───────────
+    // --- Mobile Sidebar Toggle Logic ---
+    const sidebar = document.querySelector('.dash-sidebar');
+    const mobileSidebarBtn = document.getElementById('mobile-sidebar-btn');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+
+    if (mobileSidebarBtn) {
+        mobileSidebarBtn.onclick = () => {
+            sidebar.classList.toggle('mobile-open');
+        };
+    }
+
+    if (sidebarToggle) {
+        sidebarToggle.onclick = () => {
+            sidebar.classList.toggle('collapsed');
+        };
+    }
+
+    // Close sidebar when clicking a nav item on mobile
+    document.querySelectorAll('.ds-nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 1024) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+    });
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 1024 && 
+            sidebar.classList.contains('mobile-open') && 
+            !sidebar.contains(e.target) && 
+            !mobileSidebarBtn.contains(e.target)) {
+            sidebar.classList.remove('mobile-open');
+        }
+    });
     const style = document.createElement('style');
     style.textContent = `
         .content-type-btn { flex:1; padding:0.6rem 0.4rem; border:2px solid #e2e8f0; border-radius:10px; background:#fff; cursor:pointer; font-weight:600; font-size:0.85rem; font-family:inherit; transition:.15s; }
@@ -351,9 +385,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // ─── Sidebar Toggle (Desktop & Mobile) ─────────────────────────
-    const desktopToggleBtn = document.getElementById('sidebar-toggle');
-    const mobileSidebarBtn = document.getElementById('mobile-sidebar-btn');
-    const sidebar = document.querySelector('.dash-sidebar');
 
     if (desktopToggleBtn && sidebar) {
         desktopToggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
