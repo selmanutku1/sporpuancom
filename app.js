@@ -763,7 +763,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${typeSpecificSection}
                         <div class="dp-tabs-wrap">
                             <div class="dp-tab active"><svg style="vertical-align:middle; margin-right:5px;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>Değerlendirmeler (${facility.total_reviews || 1})</div>
-                            <button class="dp-borderline-btn" id="action-review-btn">Değerlendir</button>
                         </div>
                         <div class="review-item">
                             <div class="review-header">
@@ -772,6 +771,101 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                             <p class="review-text">${facility.description || 'Tesis genel olarak iyi durumda.'}</p>
                             <div class="review-bars-inline">${reviewHtml}</div>
+                        </div>
+
+                        <!-- Inline Review Form -->
+                        <div class="inline-review-form-wrap" style="margin-top: 2rem;">
+                            <h3 style="font-size: 1.4rem; font-weight: 800; color: #0f172a; margin-bottom: 1.5rem; display:flex; align-items:center; gap:0.5rem;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                Yorum Yaz
+                            </h3>
+                            <form id="inline-review-form" data-facility-id="${facility.id}">
+                                <div class="review-rating-grid">
+                                    <div class="rating-item">
+                                        <div class="ri-top"><label>Tesis</label><span class="ri-val" id="inline-val-tesis">0/10</span></div>
+                                        <div class="ri-slider-container">
+                                            <input type="range" name="tesis" min="0" max="10" step="1" value="0" class="inline-rating-slider">
+                                            <div class="slider-track-bg"></div>
+                                            <div class="slider-track-fill" style="width:0%;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="rating-item">
+                                        <div class="ri-top"><label>Eğitmenler</label><span class="ri-val" id="inline-val-egitmenler">0/10</span></div>
+                                        <div class="ri-slider-container">
+                                            <input type="range" name="egitmenler" min="0" max="10" step="1" value="0" class="inline-rating-slider">
+                                            <div class="slider-track-bg"></div>
+                                            <div class="slider-track-fill" style="width:0%;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="rating-item">
+                                        <div class="ri-top"><label>Deneyim</label><span class="ri-val" id="inline-val-deneyim">0/10</span></div>
+                                        <div class="ri-slider-container">
+                                            <input type="range" name="deneyim" min="0" max="10" step="1" value="0" class="inline-rating-slider">
+                                            <div class="slider-track-bg"></div>
+                                            <div class="slider-track-fill" style="width:0%;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="rating-item">
+                                        <div class="ri-top"><label>Güvenlik</label><span class="ri-val" id="inline-val-guvenlik">0/10</span></div>
+                                        <div class="ri-slider-container">
+                                            <input type="range" name="guvenlik" min="0" max="10" step="1" value="0" class="inline-rating-slider">
+                                            <div class="slider-track-bg"></div>
+                                            <div class="slider-track-fill" style="width:0%;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="rating-item">
+                                        <div class="ri-top"><label>Fiyat/Performans</label><span class="ri-val" id="inline-val-fiyat">0/10</span></div>
+                                        <div class="ri-slider-container">
+                                            <input type="range" name="fiyat" min="0" max="10" step="1" value="0" class="inline-rating-slider">
+                                            <div class="slider-track-bg"></div>
+                                            <div class="slider-track-fill" style="width:0%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="review-recommend-section">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                                        <span style="font-weight:700; color:#475569;">Tesisi yakınlarına tavsiye eder misin?</span>
+                                        <span class="recommend-badge" id="inline-recommend-badge">%100 Tavsiye</span>
+                                    </div>
+                                    <div class="recommend-btns">
+                                        <button type="button" class="rec-btn inline-rec-btn" data-val="yes">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                                            Evet
+                                        </button>
+                                        <button type="button" class="rec-btn inline-rec-btn active" data-val="maybe">
+                                            <span style="font-size:1.2rem; line-height:1;">–</span>
+                                            Kararsızım
+                                        </button>
+                                        <button type="button" class="rec-btn inline-rec-btn" data-val="no">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg>
+                                            Hayır
+                                        </button>
+                                    </div>
+                                    <input type="hidden" name="recommendation" id="inline-input-recommendation" value="maybe">
+                                </div>
+
+                                <div class="review-user-info">
+                                    <div class="input-group">
+                                        <label>Adınız (isteğe bağlı)</label>
+                                        <input type="text" name="user_name" placeholder="Adınız">
+                                    </div>
+                                    <div class="input-group">
+                                        <label>E-posta (isteğe bağlı)</label>
+                                        <input type="email" name="user_email" placeholder="E-posta adresiniz">
+                                    </div>
+                                </div>
+
+                                <div class="review-comment-section">
+                                    <label>Yorumunuz</label>
+                                    <textarea name="comment" placeholder="Deneyiminizi paylaşın..." required></textarea>
+                                </div>
+
+                                <button type="submit" class="review-submit-btn-new">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:8px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 1 9 22 2"></polygon></svg>
+                                    Yorum Gönder
+                                </button>
+                            </form>
                         </div>
                     </div>
                     <div class="dp-right">
@@ -784,10 +878,67 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>`;
 
-        document.getElementById('action-review-btn').onclick = () => {
-            openModal(reviewModal);
-            reviewForm.dataset.facilityId = facility.id;
-        };
+        // --- Inline Review Form Interactivity ---
+        initInlineReviewForm();
+    }
+
+    // --- Inline Review Form Interactivity ---
+    function initInlineReviewForm() {
+        const form = document.getElementById('inline-review-form');
+        if (!form) return;
+
+        const sliders = form.querySelectorAll('.inline-rating-slider');
+        const recBtnsInline = form.querySelectorAll('.inline-rec-btn');
+
+        sliders.forEach(slider => {
+            slider.addEventListener('input', () => {
+                const val = parseFloat(slider.value);
+                const name = slider.name;
+                const valDisplay = document.getElementById(`inline-val-${name}`);
+                if (valDisplay) valDisplay.innerText = `${val}/10`;
+                
+                const fill = slider.parentElement.querySelector('.slider-track-fill');
+                if (fill) {
+                    fill.style.width = `${(val / 10) * 100}%`;
+                    if (val >= 8.5) fill.style.background = '#10b981';
+                    else if (val >= 7.0) fill.style.background = '#3b82f6';
+                    else if (val >= 5.0) fill.style.background = '#f59e0b';
+                    else fill.style.background = '#ef4444';
+                }
+            });
+        });
+
+        recBtnsInline.forEach(btn => {
+            btn.addEventListener('click', () => {
+                recBtnsInline.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const val = btn.dataset.val;
+                document.getElementById('inline-input-recommendation').value = val;
+                
+                const badge = document.getElementById('inline-recommend-badge');
+                if (badge) {
+                    if (val === 'yes') { badge.innerText = '%100 Tavsiye'; badge.style.background = '#dcfce7'; badge.style.color = '#10b981'; }
+                    else if (val === 'maybe') { badge.innerText = '%50 Tavsiye'; badge.style.background = '#fef3c7'; badge.style.color = '#d97706'; }
+                    else { badge.innerText = '%0 Tavsiye'; badge.style.background = '#fee2e2'; badge.style.color = '#ef4444'; }
+                }
+            });
+        });
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            showToast('Değerlendirmeniz başarıyla yayınlandı!');
+            form.reset();
+            sliders.forEach(slider => {
+                const name = slider.name;
+                const valDisplay = document.getElementById(`inline-val-${name}`);
+                if (valDisplay) valDisplay.innerText = '0/10';
+                const fill = slider.parentElement.querySelector('.slider-track-fill');
+                if (fill) { fill.style.width = '0%'; fill.style.background = '#cbd5e1'; }
+            });
+            recBtnsInline.forEach(b => b.classList.remove('active'));
+            const maybeBtn = form.querySelector('.inline-rec-btn[data-val="maybe"]');
+            if (maybeBtn) maybeBtn.classList.add('active');
+        });
     }
 
     // Modal Events

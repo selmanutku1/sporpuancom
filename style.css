@@ -3987,3 +3987,22 @@ body.is-home .recent-reviews-container {
     box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
     filter: brightness(1.05);
 }
+
+/* Inline Review Form on Detail Page */
+.inline-review-form-wrap {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.inline-review-form-wrap .review-rating-grid {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 768px) {
+    .inline-review-form-wrap .review-rating-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
