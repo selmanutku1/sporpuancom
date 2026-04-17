@@ -3999,10 +3999,57 @@ body.is-home .recent-reviews-container {
 
 .inline-review-form-wrap .review-rating-grid {
     grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
 }
 
+/* Mobile Responsiveness for New Features */
 @media (max-width: 768px) {
+    .inline-review-form-wrap {
+        padding: 1.5rem;
+    }
     .inline-review-form-wrap .review-rating-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .inline-review-form-wrap .review-rating-grid {
+        grid-template-columns: 1fr;
+    }
+    .review-user-info {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .recommendation-toggle {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    .prof-sect-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    #compare-toggle-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    #compare-hint {
+        font-size: 0.8rem;
+    }
+    #compare-run-btn, #compare-cancel-btn {
+        float: none !important;
+        width: 100%;
+        margin-top: 0.5rem;
+        margin-right: 0 !important;
+    }
+    /* Comparison Table Responsive */
+    #compare-result-panel .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin: 0 -1rem;
+        padding: 0 1rem;
+    }
+    #compare-result-panel table {
+        min-width: 600px;
     }
 }

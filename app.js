@@ -1650,57 +1650,59 @@ document.addEventListener('DOMContentLoaded', () => {
         const colW = Math.floor(100 / (items.length + 1));
 
         let html = `
-            <div style="background:#fff; border:1px solid var(--border-color); border-radius:16px; padding:2rem; box-shadow:var(--shadow-sm);">
+            <div style="background:#fff; border:1px solid var(--border-color); border-radius:16px; padding:1.5rem; box-shadow:var(--shadow-sm);">
                 <h3 style="font-size:1.2rem; font-weight:800; color:var(--sporpuan-navy); margin-bottom:1.5rem; display:flex; align-items:center; gap:0.5rem;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
                     Karşılaştırma Tablosu
                 </h3>
-                <table style="width:100%; border-collapse:collapse;">
-                    <thead>
-                        <tr style="border-bottom:2px solid #e2e8f0;">
-                            <th style="text-align:left; padding:0.8rem; font-size:0.85rem; color:var(--text-muted);">Kriter</th>
-                            ${itemsWithScores.map(it => `<th style="text-align:center; padding:0.8rem;">
-                                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">${it.city}</div>
-                                <div style="font-size:0.95rem; font-weight:800; color:var(--sporpuan-navy);">${it.name}</div>
-                            </th>`).join('')}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="border-bottom:1px solid #f1f5f9; background:#f8fafc;">
-                            <td style="padding:0.8rem; font-weight:700; color:var(--sporpuan-navy);">Genel Puan</td>
-                            ${itemsWithScores.map(it => {
-                                const color = it.score >= 8.5 ? '#10b981' : it.score >= 7 ? '#3b82f6' : it.score >= 5 ? '#f59e0b' : '#ef4444';
-                                return `<td style="text-align:center; padding:0.8rem;"><span style="background:${color}; color:#fff; padding:4px 12px; border-radius:8px; font-weight:800; font-size:1.1rem;">${it.score}</span></td>`;
-                            }).join('')}
-                        </tr>
-                        ${criteria.map((c, ci) => `
-                            <tr style="border-bottom:1px solid #f1f5f9;">
-                                <td style="padding:0.8rem; font-weight:600; color:#475569; font-size:0.9rem;">${c}</td>
+                <div class="table-responsive">
+                    <table style="width:100%; border-collapse:collapse;">
+                        <thead>
+                            <tr style="border-bottom:2px solid #e2e8f0;">
+                                <th style="text-align:left; padding:0.8rem; font-size:0.85rem; color:var(--text-muted);">Kriter</th>
+                                ${itemsWithScores.map(it => `<th style="text-align:center; padding:0.8rem;">
+                                    <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">${it.city}</div>
+                                    <div style="font-size:0.95rem; font-weight:800; color:var(--sporpuan-navy);">${it.name}</div>
+                                </th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom:1px solid #f1f5f9; background:#f8fafc;">
+                                <td style="padding:0.8rem; font-weight:700; color:var(--sporpuan-navy);">Genel Puan</td>
                                 ${itemsWithScores.map(it => {
-                                    const val = it.subScores[ci];
-                                    const perc = (val / 10) * 100;
-                                    const barColor = val >= 8.5 ? '#10b981' : val >= 7 ? '#3b82f6' : val >= 5 ? '#f59e0b' : '#ef4444';
-                                    return `<td style="text-align:center; padding:0.8rem;">
-                                        <div style="display:flex; align-items:center; gap:0.5rem; justify-content:center;">
-                                            <div style="flex:1; max-width:80px; height:8px; background:#e2e8f0; border-radius:4px; overflow:hidden;">
-                                                <div style="height:100%; width:${perc}%; background:${barColor}; border-radius:4px;"></div>
-                                            </div>
-                                            <span style="font-weight:700; font-size:0.85rem; color:var(--sporpuan-navy); min-width:28px;">${val}</span>
-                                        </div>
-                                    </td>`;
+                                    const color = it.score >= 8.5 ? '#10b981' : it.score >= 7 ? '#3b82f6' : it.score >= 5 ? '#f59e0b' : '#ef4444';
+                                    return `<td style="text-align:center; padding:0.8rem;"><span style="background:${color}; color:#fff; padding:4px 12px; border-radius:8px; font-weight:800; font-size:1.1rem;">${it.score}</span></td>`;
                                 }).join('')}
                             </tr>
-                        `).join('')}
-                        <tr>
-                            <td style="padding:0.8rem; font-weight:700; color:var(--sporpuan-navy);">Tavsiye</td>
-                            ${itemsWithScores.map(it => {
-                                const rec = it.score >= 8 ? '👍 Tavsiye Edilir' : it.score >= 6 ? '🤔 Orta' : '👎 Düşük';
-                                const recColor = it.score >= 8 ? '#10b981' : it.score >= 6 ? '#f59e0b' : '#ef4444';
-                                return `<td style="text-align:center; padding:0.8rem; font-weight:700; color:${recColor}; font-size:0.9rem;">${rec}</td>`;
-                            }).join('')}
-                        </tr>
-                    </tbody>
-                </table>
+                            ${criteria.map((c, ci) => `
+                                <tr style="border-bottom:1px solid #f1f5f9;">
+                                    <td style="padding:0.8rem; font-weight:600; color:#475569; font-size:0.9rem;">${c}</td>
+                                    ${itemsWithScores.map(it => {
+                                        const val = it.subScores[ci];
+                                        const perc = (val / 10) * 100;
+                                        const barColor = val >= 8.5 ? '#10b981' : val >= 7 ? '#3b82f6' : val >= 5 ? '#f59e0b' : '#ef4444';
+                                        return `<td style="text-align:center; padding:0.8rem;">
+                                            <div style="display:flex; align-items:center; gap:0.5rem; justify-content:center;">
+                                                <div style="flex:1; max-width:80px; height:8px; background:#e2e8f0; border-radius:4px; overflow:hidden;">
+                                                    <div style="height:100%; width:${perc}%; background:${barColor}; border-radius:4px;"></div>
+                                                </div>
+                                                <span style="font-weight:700; font-size:0.85rem; color:var(--sporpuan-navy); min-width:28px;">${val}</span>
+                                            </div>
+                                        </td>`;
+                                    }).join('')}
+                                </tr>
+                            `).join('')}
+                            <tr>
+                                <td style="padding:0.8rem; font-weight:700; color:var(--sporpuan-navy);">Tavsiye</td>
+                                ${itemsWithScores.map(it => {
+                                    const rec = it.score >= 8 ? '👍 Tavsiye Edilir' : it.score >= 6 ? '🤔 Orta' : '👎 Düşük';
+                                    const recColor = it.score >= 8 ? '#10b981' : it.score >= 6 ? '#f59e0b' : '#ef4444';
+                                    return `<td style="text-align:center; padding:0.8rem; font-weight:700; color:${recColor}; font-size:0.9rem;">${rec}</td>`;
+                                }).join('')}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>`;
 
         panel.innerHTML = html;
