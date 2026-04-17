@@ -11,6 +11,62 @@
 </head>
 <body class="dashboard-body">
 
+    <!-- NOTIFICATION PANEL OVERLAY -->
+    <div id="notif-overlay" style="display:none; position:fixed; inset:0; z-index:900;" onclick="closeNotifPanel()"></div>
+    <div id="notif-panel" style="display:none; position:fixed; top:64px; right:24px; width:360px; background:#fff; border-radius:16px; box-shadow:0 20px 60px rgba(15,23,42,.15); z-index:1000; overflow:hidden;">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid #f1f5f9;">
+            <h4 style="margin:0; font-size:1rem; font-weight:700; color:#0f172a;">Bildirimler</h4>
+            <button onclick="markAllRead()" style="background:none; border:none; color:#3b82f6; font-size:0.78rem; font-weight:600; cursor:pointer;">Tümünü Okundu İşaretle</button>
+        </div>
+        <div id="notif-list" style="max-height:400px; overflow-y:auto;"></div>
+    </div>
+
+    <!-- ADD CONTENT MODAL -->
+    <div id="content-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:1100; display:none; align-items:center; justify-content:center;" onclick="closeContentModal(event)">
+        <div style="background:#fff; border-radius:20px; padding:2.5rem; width:100%; max-width:560px; box-shadow:0 30px 80px rgba(0,0,0,.2); position:relative;">
+            <button onclick="closeContentModal()" style="position:absolute; top:1.2rem; right:1.2rem; background:#f1f5f9; border:none; border-radius:50%; width:32px; height:32px; cursor:pointer; font-size:1.1rem; line-height:32px; text-align:center;">✕</button>
+            <h3 style="margin:0 0 0.5rem; font-size:1.3rem; color:#0f172a;">Yeni İçerik Ekle</h3>
+            <p style="margin:0 0 1.5rem; color:#64748b; font-size:0.9rem;">Sisteme yeni bir tesis, marka veya etkinlik ekleyin.</p>
+
+            <div style="display:flex; gap:0.75rem; margin-bottom:1.5rem;">
+                <button class="content-type-btn active" data-type="facility" onclick="selectContentType(this)">🏢 Tesis</button>
+                <button class="content-type-btn" data-type="brand" onclick="selectContentType(this)">🏷️ Marka</button>
+                <button class="content-type-btn" data-type="event" onclick="selectContentType(this)">📅 Etkinlik</button>
+            </div>
+
+            <form id="add-content-form" onsubmit="submitNewContent(event)" style="display:flex; flex-direction:column; gap:1rem;">
+                <div>
+                    <label style="font-size:0.85rem; font-weight:600; color:#475569; display:block; margin-bottom:0.4rem;">Ad *</label>
+                    <input type="text" id="nc-name" required placeholder="Örn: Kadıköy Fitness Center" style="width:100%; border:1px solid #e2e8f0; border-radius:10px; padding:0.75rem; font-family:inherit; box-sizing:border-box; outline:none;">
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                    <div>
+                        <label style="font-size:0.85rem; font-weight:600; color:#475569; display:block; margin-bottom:0.4rem;">Şehir</label>
+                        <select id="nc-city" style="width:100%; border:1px solid #e2e8f0; border-radius:10px; padding:0.75rem; font-family:inherit; outline:none;">
+                            <option>İstanbul</option><option>Ankara</option><option>İzmir</option>
+                            <option>Bursa</option><option>Antalya</option><option>Trabzon</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:0.85rem; font-weight:600; color:#475569; display:block; margin-bottom:0.4rem;">Kategori</label>
+                        <select id="nc-category" style="width:100%; border:1px solid #e2e8f0; border-radius:10px; padding:0.75rem; font-family:inherit; outline:none;">
+                            <option>Fitness</option><option>Yüzme Havuzu</option><option>Tenis Kortu</option>
+                            <option>Açık Saha</option><option>Spor Salonu</option><option>Outdoor</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size:0.85rem; font-weight:600; color:#475569; display:block; margin-bottom:0.4rem;">Açıklama</label>
+                    <textarea id="nc-desc" rows="3" placeholder="Tesis/marka hakkında kısa açıklama..." style="width:100%; border:1px solid #e2e8f0; border-radius:10px; padding:0.75rem; font-family:inherit; resize:none; box-sizing:border-box; outline:none;"></textarea>
+                </div>
+                <div style="display:flex; gap:0.75rem; justify-content:flex-end; margin-top:0.5rem;">
+                    <button type="button" onclick="closeContentModal()" style="background:#f1f5f9; border:none; border-radius:10px; padding:0.75rem 1.5rem; font-weight:600; cursor:pointer; color:#475569;">İptal</button>
+                    <button type="submit" style="background:#0f172a; color:#fff; border:none; border-radius:10px; padding:0.75rem 1.5rem; font-weight:700; cursor:pointer;">Kaydet & Ekle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="dash-layout">
         <!-- SIDEBAR -->
         <aside class="dash-sidebar">
@@ -31,11 +87,15 @@
                 </button>
                 <button class="ds-nav-item" data-tab="facilities">
                     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                    <span>Tesisler & Markalar</span>
+                    <span>Tesisler &amp; Markalar</span>
                 </button>
                 <button class="ds-nav-item" data-tab="reviews">
                     <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                     <span>Yorumlar</span> <span class="badge warning ml-auto" id="pending-comments-badge">0</span>
+                </button>
+                <button class="ds-nav-item" data-tab="notifications">
+                    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    <span>Bildirimler</span> <span class="badge danger ml-auto" id="notif-badge">3</span>
                 </button>
                 
                 <div class="ds-nav-group" style="margin-top:2rem;">Ayarlar</div>
@@ -70,18 +130,18 @@
                 <div class="dt-actions">
                     <div class="dt-search">
                         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                        <input type="text" placeholder="Kullanıcı veya tesis ara...">
+                        <input type="text" id="global-search" placeholder="Kullanıcı veya tesis ara..." oninput="doGlobalSearch(this.value)">
                     </div>
-                    <button class="icon-btn">
+                    <button class="icon-btn" id="notif-btn" onclick="toggleNotifPanel()" title="Bildirimler" style="position:relative;">
                         <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                        <span class="indicator"></span>
+                        <span class="indicator" id="notif-indicator"></span>
                     </button>
-                    <button class="primary-btn-sm">+ Yeni İçerik</button>
+                    <button class="primary-btn-sm" onclick="openContentModal()">+ Yeni İçerik</button>
                 </div>
             </header>
 
+            <!-- OVERVIEW TAB -->
             <div class="dash-content-wrapper" id="content-overview">
-                <!-- STATS ROW -->
                 <div class="dash-stats-grid">
                     <div class="ds-card glass-card hover-lift">
                         <div class="card-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
@@ -92,7 +152,6 @@
                             <h2 class="val" id="stat-users">...</h2>
                         </div>
                     </div>
-
                     <div class="ds-card glass-card hover-lift">
                         <div class="card-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
                             <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -102,7 +161,6 @@
                             <h2 class="val" id="stat-facilities">...</h2>
                         </div>
                     </div>
-
                     <div class="ds-card glass-card hover-lift">
                         <div class="card-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
                             <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -112,58 +170,39 @@
                             <h2 class="val" id="stat-reviews">...</h2>
                         </div>
                     </div>
-
                     <div class="ds-card glass-card hover-lift">
-                        <div class="card-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
-                            <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        <div class="card-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+                            <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
                         </div>
                         <div class="card-info">
-                            <p class="lbl">Şikayetler</p>
-                            <h2 class="val" id="stat-complaints">...</h2>
+                            <p class="lbl">QR Toplam Puan</p>
+                            <h2 class="val" id="stat-qr-points">...</h2>
                         </div>
                     </div>
                 </div>
 
-                <!-- MAIN SECTIONS (Tables) -->
                 <div class="dash-grid-2">
                     <div class="dt-panel">
                         <div class="dtp-header">
                             <h3>Son Eklenen Tesisler</h3>
-                            <button class="text-link">Tümünü Yönet &rarr;</button>
+                            <button class="text-link" onclick="switchTab('facilities')">Tümünü Yönet &rarr;</button>
                         </div>
                         <div class="table-responsive">
                             <table class="modern-table">
-                                <thead>
-                                    <tr>
-                                        <th>Tesis Adı</th>
-                                        <th>Şehir</th>
-                                        <th>Durum</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="table-recent-facilities">
-                                    <!-- Injected -->
-                                </tbody>
+                                <thead><tr><th>Tesis Adı</th><th>Şehir</th><th>Durum</th></tr></thead>
+                                <tbody id="table-recent-facilities"></tbody>
                             </table>
                         </div>
                     </div>
-
                     <div class="dt-panel">
                         <div class="dtp-header">
-                            <h3>Son Kullanıcı Yorumları</h3>
-                            <button class="text-link">Moderatörlük Yap &rarr;</button>
+                            <h3>Bekleyen Yorumlar</h3>
+                            <button class="text-link" onclick="switchTab('reviews')">Moderatörlük Yap &rarr;</button>
                         </div>
                         <div class="table-responsive">
                             <table class="modern-table">
-                                <thead>
-                                    <tr>
-                                        <th>Kullanıcı</th>
-                                        <th>Yorum</th>
-                                        <th>İşlem</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="table-recent-reviews">
-                                    <!-- Injected -->
-                                </tbody>
+                                <thead><tr><th>Kullanıcı</th><th>Yorum</th><th>İşlem</th></tr></thead>
+                                <tbody id="table-recent-reviews"></tbody>
                             </table>
                         </div>
                     </div>
@@ -176,8 +215,12 @@
                     <div class="dtp-header">
                         <h3>Tüm Kullanıcılar</h3>
                         <div class="dtp-actions">
-                            <select class="dtp-select"><option>Tümü</option><option>Yöneticiler</option></select>
-                            <button class="primary-btn-sm">+ Davet Et</button>
+                            <input type="text" id="user-search" placeholder="Kullanıcı ara..." oninput="filterUserTable(this.value)" style="border:1px solid #e2e8f0; border-radius:8px; padding:0.5rem 0.8rem; font-family:inherit; outline:none; font-size:0.85rem;">
+                            <select id="user-role-filter" class="dtp-select" onchange="filterUserTable(document.getElementById('user-search').value)">
+                                <option value="">Tüm Roller</option>
+                                <option value="Admin">Yöneticiler</option>
+                                <option value="Kullanıcı">Kullanıcılar</option>
+                            </select>
                         </div>
                     </div>
                     <div class="table-responsive flex-1">
@@ -187,13 +230,12 @@
                                     <th>Kullanıcı</th>
                                     <th>E-Posta</th>
                                     <th>Rol</th>
+                                    <th>Sporpuan</th>
                                     <th>Kayıt Tarihi</th>
                                     <th>İşlem</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-all-users">
-                                <!-- Injected -->
-                            </tbody>
+                            <tbody id="table-all-users"></tbody>
                         </table>
                     </div>
                 </div>
@@ -205,24 +247,18 @@
                     <div class="dtp-header">
                         <h3>Tesis ve Marka Yönetimi</h3>
                         <div class="dtp-actions">
-                            <button class="primary-btn-sm" style="background:var(--sporpuan-green);">+ Tesis Ekle</button>
+                            <input type="text" id="facility-search" placeholder="Tesis ara..." oninput="filterFacilityTable(this.value)" style="border:1px solid #e2e8f0; border-radius:8px; padding:0.5rem 0.8rem; font-family:inherit; outline:none; font-size:0.85rem;">
+                            <button class="primary-btn-sm" style="background:var(--sporpuan-green);" onclick="openContentModal()">+ Tesis Ekle</button>
                         </div>
                     </div>
                     <div class="table-responsive flex-1">
                         <table class="modern-table">
                             <thead>
                                 <tr>
-                                    <th>Tesis/Marka Adı</th>
-                                    <th>Kategori</th>
-                                    <th>Şehir/Konum</th>
-                                    <th>Puan</th>
-                                    <th>Durum</th>
-                                    <th>İşlem</th>
+                                    <th>Tesis/Marka Adı</th><th>Kategori</th><th>Şehir/Konum</th><th>Puan</th><th>Durum</th><th>İşlem</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-all-facilities">
-                                <!-- Injected -->
-                            </tbody>
+                            <tbody id="table-all-facilities"></tbody>
                         </table>
                     </div>
                 </div>
@@ -234,26 +270,33 @@
                     <div class="dtp-header">
                         <h3>Kullanıcı Yorumları</h3>
                         <div class="dtp-actions">
-                            <select class="dtp-select"><option>Bekleyenler</option><option>Onaylananlar</option><option>Reddedilenler</option></select>
+                            <select class="dtp-select" id="review-status-filter" onchange="filterReviewTable(this.value)">
+                                <option value="">Tümü</option>
+                                <option value="Beklemede">Bekleyenler</option>
+                                <option value="Onaylı">Onaylananlar</option>
+                                <option value="Reddedildi">Reddedilenler</option>
+                            </select>
                         </div>
                     </div>
                     <div class="table-responsive flex-1">
                         <table class="modern-table">
                             <thead>
-                                <tr>
-                                    <th>Tarih</th>
-                                    <th>Kullanıcı</th>
-                                    <th>Tesis</th>
-                                    <th>Yorum Metni</th>
-                                    <th>Durum</th>
-                                    <th>İşlem</th>
-                                </tr>
+                                <tr><th>Tarih</th><th>Kullanıcı</th><th>Tesis</th><th>Yorum Metni</th><th>Durum</th><th>İşlem</th></tr>
                             </thead>
-                            <tbody id="table-all-reviews">
-                                <!-- Injected -->
-                            </tbody>
+                            <tbody id="table-all-reviews"></tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+
+            <!-- NOTIFICATIONS TAB -->
+            <div class="dash-content-wrapper" id="content-notifications" style="display: none;">
+                <div class="dt-panel" style="max-width:700px; margin:0 auto; width:100%;">
+                    <div class="dtp-header">
+                        <h3>Sistem Bildirimleri</h3>
+                        <button class="text-link" onclick="markAllRead()">Tümünü Okundu İşaretle</button>
+                    </div>
+                    <div id="notif-tab-list" style="padding:0;"></div>
                 </div>
             </div>
 
@@ -262,22 +305,43 @@
                 <div class="dt-panel" style="max-width:800px; margin:0 auto; width:100%;">
                     <div class="dtp-header">
                         <h3>Sistem Ayarları</h3>
-                        <button class="primary-btn-sm">Kaydet</button>
+                        <button class="primary-btn-sm" onclick="saveSettings()">Kaydet</button>
                     </div>
-                    <div style="padding:2rem;">
-                        <div style="margin-bottom:1.5rem;">
+                    <div style="padding:2rem; display:flex; flex-direction:column; gap:1.5rem;">
+                        <div>
                             <label style="display:block; font-size:0.9rem; font-weight:600; color:var(--text-muted); margin-bottom:0.5rem;">Site Adı</label>
-                            <input type="text" value="Sporpuan" style="width:100%; border:1px solid var(--border-color); border-radius:8px; padding:0.8rem; font-family:inherit;">
-                        </div>
-                        <div style="margin-bottom:1.5rem;">
-                            <label style="display:block; font-size:0.9rem; font-weight:600; color:var(--text-muted); margin-bottom:0.5rem;">Site Açıklaması (SEO)</label>
-                            <textarea style="width:100%; border:1px solid var(--border-color); border-radius:8px; padding:0.8rem; font-family:inherit; min-height:100px;">Türkiye'nin bağımsız spor platformu.</textarea>
+                            <input type="text" id="setting-site-name" value="Sporpuan" style="width:100%; border:1px solid var(--border-color); border-radius:8px; padding:0.8rem; font-family:inherit; outline:none; box-sizing:border-box;">
                         </div>
                         <div>
-                            <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; font-weight:600; color:var(--text-main); cursor:pointer;">
-                                <input type="checkbox" checked style="width:18px;height:18px;accent-color:var(--sporpuan-green);">
-                                Yeni yorumlar otomatik olarak "Beklemede" durumuna düşsün
-                            </label>
+                            <label style="display:block; font-size:0.9rem; font-weight:600; color:var(--text-muted); margin-bottom:0.5rem;">Site Açıklaması (SEO)</label>
+                            <textarea id="setting-seo-desc" style="width:100%; border:1px solid var(--border-color); border-radius:8px; padding:0.8rem; font-family:inherit; min-height:100px; resize:vertical; outline:none; box-sizing:border-box;">Türkiye'nin bağımsız spor platformu.</textarea>
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.9rem; font-weight:600; color:var(--text-muted); margin-bottom:0.75rem;">Moderasyon Kuralları</label>
+                            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                                <label style="display:flex; align-items:center; gap:0.75rem; font-size:0.9rem; color:var(--text-main); cursor:pointer;">
+                                    <input type="checkbox" id="setting-auto-pending" checked style="width:18px;height:18px;accent-color:var(--sporpuan-green);">
+                                    Yeni yorumlar otomatik olarak "Beklemede" durumuna düşsün
+                                </label>
+                                <label style="display:flex; align-items:center; gap:0.75rem; font-size:0.9rem; color:var(--text-main); cursor:pointer;">
+                                    <input type="checkbox" id="setting-email-notif" checked style="width:18px;height:18px;accent-color:var(--sporpuan-green);">
+                                    Yeni yorum geldiğinde admin'e e-posta gönder
+                                </label>
+                                <label style="display:flex; align-items:center; gap:0.75rem; font-size:0.9rem; color:var(--text-main); cursor:pointer;">
+                                    <input type="checkbox" id="setting-qr-active" checked style="width:18px;height:18px;accent-color:var(--sporpuan-green);">
+                                    QR puan sistemi aktif olsun
+                                </label>
+                            </div>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                            <div>
+                                <label style="display:block; font-size:0.9rem; font-weight:600; color:var(--text-muted); margin-bottom:0.5rem;">Tesis QR Puanı</label>
+                                <input type="number" id="setting-facility-pts" value="10" style="width:100%; border:1px solid var(--border-color); border-radius:8px; padding:0.8rem; font-family:inherit; outline:none; box-sizing:border-box;">
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.9rem; font-weight:600; color:var(--text-muted); margin-bottom:0.5rem;">Etkinlik QR Puanı</label>
+                                <input type="number" id="setting-event-pts" value="50" style="width:100%; border:1px solid var(--border-color); border-radius:8px; padding:0.8rem; font-family:inherit; outline:none; box-sizing:border-box;">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -289,3 +353,4 @@
     <script src="dashboard.js"></script>
 </body>
 </html>
+

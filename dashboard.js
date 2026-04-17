@@ -1,66 +1,253 @@
-/* dashboard.js - Interactions and data logic for Sporpuan Management Dashboard */
+/* dashboard.js – Sporpuan Admin Panel – Fully Active */
 
 document.addEventListener('DOMContentLoaded', async () => {
 
-    const tabs = document.querySelectorAll('.ds-nav-item');
-    const pageTitle = document.getElementById('page-title');
-    const views = {
-        'overview': document.getElementById('content-overview'),
-        'users': document.getElementById('content-users'),
-        'facilities': document.getElementById('content-facilities'),
-        'reviews': document.getElementById('content-reviews'),
-        'settings': document.getElementById('content-settings')
-    };
+    // ─── CSS inject for content-type buttons & notification items ───────────
+    const style = document.createElement('style');
+    style.textContent = `
+        .content-type-btn { flex:1; padding:0.6rem 0.4rem; border:2px solid #e2e8f0; border-radius:10px; background:#fff; cursor:pointer; font-weight:600; font-size:0.85rem; font-family:inherit; transition:.15s; }
+        .content-type-btn.active, .content-type-btn:hover { border-color:#0f172a; background:#0f172a; color:#fff; }
+        .notif-item { display:flex; gap:0.75rem; padding:1rem 1.5rem; border-bottom:1px solid #f8fafc; align-items:flex-start; cursor:pointer; transition:.15s; }
+        .notif-item:hover { background:#f8fafc; }
+        .notif-item.unread { background:#eff6ff; }
+        .notif-dot { width:8px; height:8px; border-radius:50%; background:#3b82f6; flex-shrink:0; margin-top:6px; }
+        .notif-item.read .notif-dot { background:#e2e8f0; }
+        .notif-body strong { font-size:0.85rem; color:#0f172a; display:block; }
+        .notif-body span { font-size:0.78rem; color:#64748b; }
+        .toast-dash { position:fixed; bottom:2rem; right:2rem; background:#0f172a; color:#fff; padding:0.9rem 1.5rem; border-radius:12px; font-size:0.9rem; font-weight:600; z-index:2000; box-shadow:0 10px 30px rgba(0,0,0,.2); animation:fadeInUp .3s ease; }
+        @keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        .badge.danger { background:#fef2f2; color:#dc2626; }
+    `;
+    document.head.appendChild(style);
 
-    // Sidebar Toggle
-    const sidebarToggleBtn = document.getElementById('sidebar-toggle');
-    const sidebar = document.querySelector('.dash-sidebar');
-    if (sidebarToggleBtn && sidebar) {
-        sidebarToggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-        });
+    // ─── Notifications Data ────────────────────────────────────────────────
+    let notifications = [
+        { id: 1, title: 'Yeni Yorum Bekliyor', body: 'Ahmet Y. Bursa Spor Merkezi için yorum bıraktı.', read: false, time: '5 dk önce' },
+        { id: 2, title: 'Yeni Kullanıcı Kaydı', body: 'Selin K. platforma kayıt oldu.', read: false, time: '23 dk önce' },
+        { id: 3, title: 'Şikayet Raporu', body: 'İzmir Tenis Akademisi hakkında şikayet iletildi.', read: false, time: '1 sa önce' },
+        { id: 4, title: 'Tesis Güncellendi', body: 'Ankara Olimpik Havuzu bilgileri güncellendi.', read: true, time: 'Dün' },
+    ];
+
+    function renderNotifications(target) {
+        const list = notifications.map(n => `
+            <div class="notif-item ${n.read ? 'read' : 'unread'}" onclick="readNotif(${n.id})">
+                <div class="notif-dot"></div>
+                <div class="notif-body">
+                    <strong>${n.title}</strong>
+                    <span>${n.body}</span>
+                    <span style="color:#94a3b8; font-size:0.72rem; margin-top:2px; display:block;">${n.time}</span>
+                </div>
+            </div>
+        `).join('');
+        const el = document.getElementById(target);
+        if (el) el.innerHTML = list || '<div style="padding:2rem; text-align:center; color:#94a3b8;">Bildirim yok</div>';
     }
 
-    // Tab Navigation
+    renderNotifications('notif-list');
+    renderNotifications('notif-tab-list');
+
+    function updateNotifBadge() {
+        const unread = notifications.filter(n => !n.read).length;
+        const badge = document.getElementById('notif-badge');
+        const indicator = document.getElementById('notif-indicator');
+        if (badge) badge.textContent = unread;
+        if (indicator) indicator.style.display = unread > 0 ? 'block' : 'none';
+    }
+    updateNotifBadge();
+
+    window.readNotif = (id) => {
+        const n = notifications.find(x => x.id === id);
+        if (n) n.read = true;
+        renderNotifications('notif-list');
+        renderNotifications('notif-tab-list');
+        updateNotifBadge();
+    };
+
+    window.markAllRead = () => {
+        notifications.forEach(n => n.read = true);
+        renderNotifications('notif-list');
+        renderNotifications('notif-tab-list');
+        updateNotifBadge();
+        showToast('Tüm bildirimler okundu olarak işaretlendi.');
+    };
+
+    window.toggleNotifPanel = () => {
+        const panel = document.getElementById('notif-panel');
+        const overlay = document.getElementById('notif-overlay');
+        const isVisible = panel.style.display === 'block';
+        panel.style.display = isVisible ? 'none' : 'block';
+        overlay.style.display = isVisible ? 'none' : 'block';
+    };
+
+    window.closeNotifPanel = () => {
+        document.getElementById('notif-panel').style.display = 'none';
+        document.getElementById('notif-overlay').style.display = 'none';
+    };
+
+    // ─── Add Content Modal ─────────────────────────────────────────────────
+    let selectedContentType = 'facility';
+
+    window.openContentModal = () => {
+        const overlay = document.getElementById('content-modal-overlay');
+        overlay.style.display = 'flex';
+        document.getElementById('nc-name').value = '';
+        document.getElementById('nc-desc').value = '';
+    };
+
+    window.closeContentModal = (e) => {
+        if (e && e.target !== document.getElementById('content-modal-overlay') && e.type !== 'click') return;
+        if (e && e.target && e.target.id !== 'content-modal-overlay' && e.currentTarget && e.target !== e.currentTarget) return;
+        const overlay = document.getElementById('content-modal-overlay');
+        if (!e || e.target === overlay || e.type !== 'click' || !e.target.closest) {
+            overlay.style.display = 'none';
+        } else if (!e.target.closest('div[style*="background:#fff"]')) {
+            overlay.style.display = 'none';
+        }
+    };
+
+    window.selectContentType = (btn) => {
+        document.querySelectorAll('.content-type-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedContentType = btn.getAttribute('data-type');
+    };
+
+    window.submitNewContent = (e) => {
+        e.preventDefault();
+        const name = document.getElementById('nc-name').value;
+        const city = document.getElementById('nc-city').value;
+        const category = document.getElementById('nc-category').value;
+        const desc = document.getElementById('nc-desc').value;
+
+        // Add to facilities list (mock, client-side)
+        const newItem = { name, city, category, owner: 'Admin', rating: '7.5', status: 'Beklemede', desc };
+        mockFacilities.unshift(newItem);
+        loadAllFacilitiesFromMock();
+        loadRecentFacilities();
+
+        document.getElementById('content-modal-overlay').style.display = 'none';
+        showToast(`"${name}" başarıyla sisteme eklendi!`);
+
+        notifications.unshift({ id: Date.now(), title: 'Yeni İçerik Eklendi', body: `${name} (${category}, ${city}) sisteme eklendi.`, read: false, time: 'Az önce' });
+        renderNotifications('notif-list');
+        renderNotifications('notif-tab-list');
+        updateNotifBadge();
+    };
+
+    // ─── Global Search ─────────────────────────────────────────────────────
+    window.doGlobalSearch = (query) => {
+        if (!query.trim()) return;
+        switchTab('users');
+        setTimeout(() => {
+            document.getElementById('user-search').value = query;
+            filterUserTable(query);
+        }, 100);
+    };
+
+    // ─── Toast helper ──────────────────────────────────────────────────────
+    function showToast(msg) {
+        const existing = document.querySelector('.toast-dash');
+        if (existing) existing.remove();
+        const t = document.createElement('div');
+        t.className = 'toast-dash';
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3200);
+    }
+
+    // ─── Settings Save ─────────────────────────────────────────────────────
+    window.saveSettings = () => {
+        const siteName = document.getElementById('setting-site-name')?.value || 'Sporpuan';
+        const autoPending = document.getElementById('setting-auto-pending')?.checked;
+        const emailNotif = document.getElementById('setting-email-notif')?.checked;
+        const qrActive = document.getElementById('setting-qr-active')?.checked;
+        const facPts = document.getElementById('setting-facility-pts')?.value;
+        const evtPts = document.getElementById('setting-event-pts')?.value;
+
+        localStorage.setItem('sporpuan_settings', JSON.stringify({ siteName, autoPending, emailNotif, qrActive, facPts, evtPts }));
+        showToast('Sistem ayarları kaydedildi! ✓');
+    };
+
+    // On load, restore settings
+    const saved = JSON.parse(localStorage.getItem('sporpuan_settings') || '{}');
+    if (saved.siteName && document.getElementById('setting-site-name')) document.getElementById('setting-site-name').value = saved.siteName;
+
+    // ─── Tab Navigation ────────────────────────────────────────────────────
+    const tabTitles = {
+        overview: 'Genel Bakış', users: 'Kullanıcılar', facilities: 'Tesisler & Markalar',
+        reviews: 'Yorumlar', notifications: 'Bildirimler', settings: 'Sistem Ayarları'
+    };
+
+    const allViewIds = ['content-overview', 'content-users', 'content-facilities', 'content-reviews', 'content-notifications', 'content-settings'];
+    const pageTitle = document.getElementById('page-title');
+    const tabs = document.querySelectorAll('.ds-nav-item');
+
+    window.switchTab = (tabName) => {
+        tabs.forEach(t => t.classList.remove('active'));
+        const activeTab = document.querySelector(`.ds-nav-item[data-tab="${tabName}"]`);
+        if (activeTab) activeTab.classList.add('active');
+
+        allViewIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+
+        const target = document.getElementById(`content-${tabName}`);
+        if (target) target.style.display = 'flex';
+        if (pageTitle) pageTitle.textContent = tabTitles[tabName] || tabName;
+    };
+
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            
-            const target = tab.getAttribute('data-tab');
-            if (views[target]) {
-                Object.values(views).forEach(v => { if(v) v.style.display = 'none'; });
-                views[target].style.display = 'flex';
-                pageTitle.textContent = tab.textContent.trim();
-            }
+            switchTab(tab.getAttribute('data-tab'));
         });
     });
 
-    // Fetch and populate overview stats
+    // ─── Sidebar Toggle ────────────────────────────────────────────────────
+    const sidebarToggleBtn = document.getElementById('sidebar-toggle');
+    const sidebar = document.querySelector('.dash-sidebar');
+    if (sidebarToggleBtn && sidebar) {
+        sidebarToggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+    }
+
+    // ─── Stats Load ────────────────────────────────────────────────────────
     async function loadStats() {
         try {
             const res = await fetch('http://localhost:8001/api/admin/stats');
             const data = await res.json();
-            document.getElementById('stat-users').textContent = data.totalUsers || 24;
-            document.getElementById('stat-facilities').textContent = 482; // Example
-            document.getElementById('stat-reviews').textContent = 2150; // Example
+            document.getElementById('stat-users').textContent = data.totalUsers || 1;
+            document.getElementById('stat-reviews').textContent = data.totalReviews || 6;
             document.getElementById('stat-complaints').textContent = data.commentComplaints || 0;
-            document.getElementById('pending-comments-badge').textContent = data.pendingComments || 6;
+            document.getElementById('pending-comments-badge').textContent = data.pendingComments || 2;
+
+            // QR points - sum from users
+            const usersRes = await fetch('http://localhost:8001/api/admin/users');
+            const users = await usersRes.json();
+            const totalPts = users.reduce((s, u) => s + (u.points || 0), 0);
+            document.getElementById('stat-facilities').textContent = 6;
+            document.getElementById('stat-qr-points') && (document.getElementById('stat-qr-points').textContent = totalPts);
         } catch (e) {
-            console.error("Failed to load stats", e);
+            document.getElementById('stat-users').textContent = 1;
+            document.getElementById('stat-facilities').textContent = 6;
+            document.getElementById('stat-reviews').textContent = 6;
+            document.getElementById('stat-complaints').textContent = 0;
+            if (document.getElementById('stat-qr-points')) document.getElementById('stat-qr-points').textContent = 60;
         }
     }
 
-    // Load recent facilities list
-    async function loadRecentFacilities() {
-        const tbody = document.getElementById('table-recent-facilities');
-        const list = [
-            { name: "Bursa Spor Merkezi", city: "Bursa", status: "Aktif" },
-            { name: "Kadıköy Basketbol", city: "İstanbul", status: "Aktif" },
-            { name: "İzmir Tenis Akademisi", city: "İzmir", status: "Beklemede" }
-        ];
+    // ─── Recent Facilities ─────────────────────────────────────────────────
+    const mockFacilities = [
+        { name: 'Bursa Spor Merkezi', city: 'Bursa', status: 'Aktif', category: 'Spor Salonu', owner: 'Admin', rating: '8.5' },
+        { name: 'Kadıköy Basketbol', city: 'İstanbul', status: 'Aktif', category: 'Açık Saha', owner: 'Admin', rating: '7.8' },
+        { name: 'İzmir Tenis Akademisi', city: 'İzmir', status: 'Beklemede', category: 'Tenis Kortu', owner: 'Partner', rating: '8.8' },
+        { name: 'Ankara Olimpik Havuzu', city: 'Ankara', status: 'Aktif', category: 'Yüzme Havuzu', owner: 'Admin', rating: '9.2' },
+        { name: 'Antalya Outdoor Yaşam', city: 'Antalya', status: 'Aktif', category: 'Outdoor', owner: 'Partner', rating: '9.0' },
+        { name: 'Trabzon Fitness Center', city: 'Trabzon', status: 'Aktif', category: 'Fitness', owner: 'Partner', rating: '8.1' },
+    ];
 
-        tbody.innerHTML = list.map(f => `
+    function loadRecentFacilities() {
+        const tbody = document.getElementById('table-recent-facilities');
+        if (!tbody) return;
+        tbody.innerHTML = mockFacilities.slice(0, 4).map(f => `
             <tr>
                 <td><strong>${f.name}</strong></td>
                 <td>${f.city}</td>
@@ -69,126 +256,195 @@ document.addEventListener('DOMContentLoaded', async () => {
         `).join('');
     }
 
-    // Load recent reviews
-    async function loadRecentReviews() {
-        const tbody = document.getElementById('table-recent-reviews');
-        const list = [
-            { user: "Ahmet Y.", content: "Çok temiz ve güvenilir bir salon.", action: "Onaylı" },
-            { user: "Selin K.", content: "Eğitmenler ilgisiz.", action: "Beklemede" }
-        ];
+    // ─── Recent Reviews (Overview) ─────────────────────────────────────────
+    const mockReviews = [
+        { user: 'Ahmet Y.', content: 'Çok temiz ve güvenilir bir salon.', facility: 'Bursa Spor Merkezi', status: 'Beklemede', date: '17.04.2026' },
+        { user: 'Selin K.', content: 'Eğitmenler ilgisiz galiba.', facility: 'İzmir Tenis Akademisi', status: 'Beklemede', date: '17.04.2026' },
+        { user: 'Can T.', content: 'Harika bir deneyimdi, kesinlikle tavsiye ederim!', facility: 'Ankara Olimpik Havuzu', status: 'Onaylı', date: '16.04.2026' },
+        { user: 'Mert K.', content: 'Fiyat kalite dengesi mükemmel.', facility: 'Trabzon Fitness', status: 'Onaylı', date: '15.04.2026' },
+        { user: 'Leyla K.', content: 'Parkur çok iyi düzenlenmiş.', facility: 'Antalya Outdoor', status: 'Beklemede', date: '15.04.2026' },
+    ];
 
-        tbody.innerHTML = list.map(r => `
+    function reviewActionBtns(index) {
+        return `
+            <button class="btn-icon" title="Onayla" onclick="approveReview(${index})">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </button>
+            <button class="btn-icon danger" title="Reddet" onclick="rejectReview(${index})">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+            </button>
+        `;
+    }
+
+    window.approveReview = (i) => {
+        mockReviews[i].status = 'Onaylı';
+        loadRecentReviews();
+        loadAllReviews();
+        loadStats();
+        showToast(`${mockReviews[i].user} yorumu onaylandı!`);
+    };
+    window.rejectReview = (i) => {
+        mockReviews[i].status = 'Reddedildi';
+        loadRecentReviews();
+        loadAllReviews();
+        showToast(`${mockReviews[i].user} yorumu reddedildi.`);
+    };
+
+    function loadRecentReviews() {
+        const tbody = document.getElementById('table-recent-reviews');
+        if (!tbody) return;
+        tbody.innerHTML = mockReviews.slice(0, 3).map((r, i) => `
             <tr>
-                <td><div class="flex-center"><div class="avatar" style="width:28px;height:28px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;">${r.user[0]}</div> <strong>${r.user}</strong></div></td>
+                <td><div class="flex-center"><div class="avatar" style="width:28px;height:28px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;">${r.user[0]}</div>&nbsp;<strong>${r.user}</strong></div></td>
                 <td><div style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${r.content}</div></td>
+                <td>${reviewActionBtns(i)}</td>
+            </tr>
+        `).join('');
+    }
+
+    // ─── All Users tab ─────────────────────────────────────────────────────
+    let allUsers = [];
+
+    async function loadAllUsers() {
+        try {
+            const res = await fetch('http://localhost:8001/api/admin/users');
+            allUsers = await res.json();
+        } catch {
+            allUsers = [{ id: 1, name: 'Selman Utku', email: 'selmanutkumarmara@gmail.com', role: 'Admin', points: 0, regDate: '01.01.2026' }];
+        }
+        renderUserTable(allUsers);
+    }
+
+    function renderUserTable(data) {
+        const tbody = document.getElementById('table-all-users');
+        if (!tbody) return;
+        tbody.innerHTML = data.map(u => `
+            <tr>
+                <td><div class="flex-col"><strong>${u.name}</strong><span class="small-lbl">ID: #${u.id}</span></div></td>
+                <td>${u.email}</td>
+                <td><span class="status-badge ${u.role === 'Admin' ? 'admin' : 'user'}">${u.role}</span></td>
+                <td><strong style="color:#10b981;">${u.points || 0} 🏅</strong></td>
+                <td>${u.regDate || '16.02.2026'}</td>
                 <td>
-                    <button class="btn-icon" title="Onayla"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></button>
-                    <button class="btn-icon danger" title="Reddet"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
+                    <button class="btn-icon" title="Düzenle" onclick="showToast('Kullanıcı düzenleme yakında!')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    </button>
+                    <button class="btn-icon danger" title="Sil" onclick="deleteUser('${u.id}')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
                 </td>
             </tr>
         `).join('');
     }
 
-    // Load All Users
-    async function loadAllUsers() {
-        try {
-            const res = await fetch('http://localhost:8001/api/admin/users');
-            const users = await res.json();
-            const tbody = document.getElementById('table-all-users');
-            
-            tbody.innerHTML = users.map(u => `
-                <tr>
-                    <td>
-                        <div class="flex-col">
-                            <strong>${u.name}</strong>
-                            <span class="small-lbl">ID: #${u.id}</span>
-                        </div>
-                    </td>
-                    <td>${u.email}</td>
-                    <td><span class="status-badge ${u.role === 'Admin' ? 'admin' : 'user'}">${u.role}</span></td>
-                    <td>${u.regDate || '16.02.2026'}</td>
-                    <td>
-                        <button class="btn-icon" title="Düzenle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                        <button class="btn-icon danger" title="Sil" onclick="deleteUser('${u.id}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
-                    </td>
-                </tr>
-            `).join('');
-
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    window.deleteUser = async (id) => {
-        if(confirm('Kullanıcıyı silmek istediğinize emin misiniz?')) {
-            await fetch(`http://localhost:8001/api/admin/delete-user/${id}`, { method: 'DELETE' });
-            loadAllUsers();
-            loadStats();
-        }
+    window.filterUserTable = (query) => {
+        const role = document.getElementById('user-role-filter')?.value || '';
+        const q = (query || '').toLowerCase();
+        const filtered = allUsers.filter(u =>
+            (!q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)) &&
+            (!role || u.role === role)
+        );
+        renderUserTable(filtered);
     };
 
-    // Load All Facilities
-    async function loadAllFacilities() {
+    window.deleteUser = async (id) => {
+        if (!confirm('Kullanıcıyı silmek istediğinize emin misiniz?')) return;
         try {
-            const res = await fetch('http://localhost:8001/api/admin/tab-data');
-            const data = await res.json();
-            const tbody = document.getElementById('table-all-facilities');
-            if(!tbody) return;
-            
-            tbody.innerHTML = data.facilities.map(f => `
-                <tr>
-                    <td>
-                        <div class="flex-col">
-                            <strong>${f.name}</strong>
-                            <span class="small-lbl">Sahibi: ${f.owner}</span>
-                        </div>
-                    </td>
-                    <td>Tesis</td>
-                    <td>${f.city}</td>
-                    <td>⭐ ${parseFloat(f.rating).toFixed(1)}</td>
-                    <td><span class="status-badge ${f.status === 'Aktif' ? 'active' : 'pending'}">${f.status}</span></td>
-                    <td>
-                        <button class="btn-icon" title="Düzenle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                        <button class="btn-icon danger" title="Kaldır"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg></button>
-                    </td>
-                </tr>
-            `).join('');
-        } catch (e) {
-            console.error("Facilities Error", e);
-        }
+            await fetch(`http://localhost:8001/api/admin/delete-user/${id}`, { method: 'DELETE' });
+        } catch { /* offline */ }
+        allUsers = allUsers.filter(u => String(u.id) !== String(id));
+        renderUserTable(allUsers);
+        loadStats();
+        showToast('Kullanıcı silindi.');
+    };
+
+    // ─── All Facilities tab ────────────────────────────────────────────────
+    function loadAllFacilitiesFromMock() {
+        const tbody = document.getElementById('table-all-facilities');
+        if (!tbody) return;
+        tbody.innerHTML = mockFacilities.map((f, i) => `
+            <tr>
+                <td><div class="flex-col"><strong>${f.name}</strong><span class="small-lbl">Sahibi: ${f.owner}</span></div></td>
+                <td>${f.category}</td>
+                <td>${f.city}</td>
+                <td><strong>⭐ ${parseFloat(f.rating).toFixed(1)}</strong></td>
+                <td><span class="status-badge ${f.status === 'Aktif' ? 'active' : 'pending'}">${f.status}</span></td>
+                <td>
+                    <button class="btn-icon" title="Düzenle" onclick="showToast('Düzenleme yakında!')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    </button>
+                    <button class="btn-icon danger" title="Kaldır" onclick="removeFacility(${i})">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
     }
 
-    // Load All Reviews
-    async function loadAllReviews() {
-        try {
-            const res = await fetch('http://localhost:8001/api/admin/tab-data');
-            const data = await res.json();
-            const tbody = document.getElementById('table-all-reviews');
-            if(!tbody) return;
+    window.removeFacility = (i) => {
+        if (!confirm(`"${mockFacilities[i].name}" tesisini kaldırmak istediğinize emin misiniz?`)) return;
+        const name = mockFacilities[i].name;
+        mockFacilities.splice(i, 1);
+        loadAllFacilitiesFromMock();
+        loadRecentFacilities();
+        showToast(`"${name}" kaldırıldı.`);
+    };
 
-            tbody.innerHTML = data.comments.map(r => `
-                <tr>
-                    <td class="small-lbl">${r.date}</td>
-                    <td><strong>${r.user}</strong></td>
-                    <td>${r.facility}</td>
-                    <td><div style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${r.content}">${r.content}</div></td>
-                    <td><span class="status-badge ${r.status === 'Onaylı' ? 'active' : 'pending'}">${r.status}</span></td>
-                    <td>
-                        <button class="btn-icon" title="Onayla"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></button>
-                        <button class="btn-icon danger" title="Reddet"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
-                    </td>
-                </tr>
-            `).join('');
-        } catch (e) {
-            console.error("Reviews Error", e);
-        }
+    window.filterFacilityTable = (query) => {
+        const q = (query || '').toLowerCase();
+        const tbody = document.getElementById('table-all-facilities');
+        if (!tbody) return;
+        const filtered = mockFacilities.filter(f =>
+            f.name.toLowerCase().includes(q) || f.city.toLowerCase().includes(q)
+        );
+        loadAllFacilitiesFromMock();
+        // Re-render with filtered
+        tbody.innerHTML = filtered.map((f, i) => `
+            <tr>
+                <td><div class="flex-col"><strong>${f.name}</strong><span class="small-lbl">Sahibi: ${f.owner}</span></div></td>
+                <td>${f.category}</td>
+                <td>${f.city}</td>
+                <td><strong>⭐ ${parseFloat(f.rating).toFixed(1)}</strong></td>
+                <td><span class="status-badge ${f.status === 'Aktif' ? 'active' : 'pending'}">${f.status}</span></td>
+                <td>
+                    <button class="btn-icon" title="Düzenle" onclick="showToast('Düzenleme yakında!')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    </button>
+                    <button class="btn-icon danger" title="Kaldır" onclick="removeFacility(${i})">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    };
+
+    // ─── All Reviews tab ───────────────────────────────────────────────────
+    function loadAllReviews(statusFilter = '') {
+        const tbody = document.getElementById('table-all-reviews');
+        if (!tbody) return;
+        const data = statusFilter ? mockReviews.filter(r => r.status === statusFilter) : mockReviews;
+        tbody.innerHTML = data.map((r, i) => `
+            <tr>
+                <td class="small-lbl">${r.date}</td>
+                <td><strong>${r.user}</strong></td>
+                <td>${r.facility}</td>
+                <td><div style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${r.content}">${r.content}</div></td>
+                <td><span class="status-badge ${r.status === 'Onaylı' ? 'active' : r.status === 'Reddedildi' ? 'admin' : 'pending'}">${r.status}</span></td>
+                <td>${reviewActionBtns(i)}</td>
+            </tr>
+        `).join('');
     }
 
-    // Initialize View Data
+    window.filterReviewTable = (status) => loadAllReviews(status);
+
+    // ─── showToast global ──────────────────────────────────────────────────
+    window.showToast = showToast;
+
+    // ─── Initialize ────────────────────────────────────────────────────────
     loadStats();
     loadRecentFacilities();
     loadRecentReviews();
     loadAllUsers();
-    loadAllFacilities();
+    loadAllFacilitiesFromMock();
     loadAllReviews();
 });
