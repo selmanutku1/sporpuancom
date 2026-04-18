@@ -223,6 +223,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 100);
         }
 
+        // Initialize Dashboard if entering dashboard view
+        if (targetId === 'dashboard-view' && typeof window.initDashboardLogic === 'function') {
+            window.initDashboardLogic();
+        }
+
         window.scrollTo(0, 0);
         if (window.hideMobileMenu) window.hideMobileMenu();
     };

@@ -1,644 +1,158 @@
-/* dashboard.js – Sporpuan Admin Panel – Fully Active */
+/* dashboard.js – Sporpuan Admin Panel – Integrated Version */
 
-document.addEventListener('DOMContentLoaded', async () => {
+window.initDashboardLogic = async () => {
+    console.log("Initializing Dashboard Logic...");
 
-    // --- Mobile Sidebar Toggle Logic ---
+    // --- Sidebar & Mobile Toggle Refs ---
     const sidebar = document.querySelector('.dash-sidebar');
     const mobileSidebarBtn = document.getElementById('mobile-sidebar-btn');
     const sidebarToggle = document.getElementById('sidebar-toggle');
 
-    if (mobileSidebarBtn) {
-        mobileSidebarBtn.onclick = () => {
-            sidebar.classList.toggle('mobile-open');
-        };
+    if (mobileSidebarBtn && sidebar) {
+        mobileSidebarBtn.onclick = () => sidebar.classList.toggle('mobile-open');
+    }
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.onclick = () => sidebar.classList.toggle('collapsed');
     }
 
-    if (sidebarToggle) {
-        sidebarToggle.onclick = () => {
-            sidebar.classList.toggle('collapsed');
-        };
-    }
-
-    // Close sidebar when clicking a nav item on mobile
+    // Close sidebar on nav click (mobile)
     document.querySelectorAll('.ds-nav-item').forEach(item => {
         item.addEventListener('click', () => {
-            if (window.innerWidth <= 1024) {
+            if (window.innerWidth <= 1024 && sidebar) {
                 sidebar.classList.remove('mobile-open');
             }
         });
     });
 
-    // Close sidebar when clicking outside on mobile
-    document.addEventListener('click', (e) => {
-        if (window.innerWidth <= 1024 && 
-            sidebar.classList.contains('mobile-open') && 
-            !sidebar.contains(e.target) && 
-            !mobileSidebarBtn.contains(e.target)) {
-            sidebar.classList.remove('mobile-open');
-        }
-    });
-    const style = document.createElement('style');
-    style.textContent = `
-        .content-type-btn { flex:1; padding:0.6rem 0.4rem; border:2px solid #e2e8f0; border-radius:10px; background:#fff; cursor:pointer; font-weight:600; font-size:0.85rem; font-family:inherit; transition:.15s; }
-        .content-type-btn.active, .content-type-btn:hover { border-color:#0f172a; background:#0f172a; color:#fff; }
-        .notif-item { display:flex; gap:0.75rem; padding:1rem 1.5rem; border-bottom:1px solid #f8fafc; align-items:flex-start; cursor:pointer; transition:.15s; }
-        .notif-item:hover { background:#f8fafc; }
-        .notif-item.unread { background:#eff6ff; }
-        .notif-dot { width:8px; height:8px; border-radius:50%; background:#3b82f6; flex-shrink:0; margin-top:6px; }
-        .notif-item.read .notif-dot { background:#e2e8f0; }
-        .notif-body strong { font-size:0.85rem; color:#0f172a; display:block; }
-        .notif-body span { font-size:0.78rem; color:#64748b; }
-        .toast-dash { position:fixed; bottom:2rem; right:2rem; background:#0f172a; color:#fff; padding:0.9rem 1.5rem; border-radius:12px; font-size:0.9rem; font-weight:600; z-index:2000; box-shadow:0 10px 30px rgba(0,0,0,.2); animation:fadeInUp .3s ease; }
-        @keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-        .badge.danger { background:#fef2f2; color:#dc2626; }
-    `;
-    document.head.appendChild(style);
-
-    // ─── Notifications Data ────────────────────────────────────────────────
-    let notifications = [
-        { id: 1, title: 'Yeni Yorum Bekliyor', body: 'Ahmet Y. Bursa Spor Merkezi için yorum bıraktı.', read: false, time: '5 dk önce' },
-        { id: 2, title: 'Yeni Kullanıcı Kaydı', body: 'Selin K. platforma kayıt oldu.', read: false, time: '23 dk önce' },
-        { id: 3, title: 'Şikayet Raporu', body: 'İzmir Tenis Akademisi hakkında şikayet iletildi.', read: false, time: '1 sa önce' },
-        { id: 4, title: 'Tesis Güncellendi', body: 'Ankara Olimpik Havuzu bilgileri güncellendi.', read: true, time: 'Dün' },
-    ];
-
-    function renderNotifications(target) {
-        const list = notifications.map(n => `
-            <div class="notif-item ${n.read ? 'read' : 'unread'}" onclick="readNotif(${n.id})">
-                <div class="notif-dot"></div>
-                <div class="notif-body">
-                    <strong>${n.title}</strong>
-                    <span>${n.body}</span>
-                    <span style="color:#94a3b8; font-size:0.72rem; margin-top:2px; display:block;">${n.time}</span>
-                </div>
-            </div>
-        `).join('');
-        const el = document.getElementById(target);
-        if (el) el.innerHTML = list || '<div style="padding:2rem; text-align:center; color:#94a3b8;">Bildirim yok</div>';
+    // --- State & Initialization ---
+    if (!window.mockFacilities) {
+        window.mockFacilities = [
+            { _type: 'facility', name: 'Bursa Spor Merkezi', city: 'Bursa', status: 'Aktif', category: 'Spor Salonu', owner: 'Admin', rating: '8.5' },
+            { _type: 'facility', name: 'Kadıköy Basketbol', city: 'İstanbul', status: 'Aktif', category: 'Açık Saha', owner: 'Admin', rating: '7.8' },
+            { _type: 'facility', name: 'İzmir Tenis Akademisi', city: 'İzmir', status: 'Beklemede', category: 'Tenis Kortu', owner: 'Partner', rating: '8.8' },
+            { _type: 'brand', name: 'Nike Türkiye', city: 'İstanbul', status: 'Aktif', category: 'Spor Giyim', owner: 'Marka', rating: '9.5' }
+        ];
     }
 
-    renderNotifications('notif-list');
-    renderNotifications('notif-tab-list');
-
-    function updateNotifBadge() {
-        const unread = notifications.filter(n => !n.read).length;
-        const badge = document.getElementById('notif-badge');
-        const indicator = document.getElementById('notif-indicator');
-        if (badge) badge.textContent = unread;
-        if (indicator) indicator.style.display = unread > 0 ? 'block' : 'none';
+    if (!window.allUsers) {
+        window.allUsers = [
+            { id: 1, name: 'Selman Utku', email: 'selmanutkumarmara@gmail.com', role: 'Admin', points: 250, regDate: '01.01.2026' }
+        ];
     }
-    updateNotifBadge();
 
-    window.readNotif = (id) => {
-        const n = notifications.find(x => x.id === id);
-        if (n) n.read = true;
-        renderNotifications('notif-list');
-        renderNotifications('notif-tab-list');
-        updateNotifBadge();
-    };
+    // Load initial data
+    loadStats();
+    loadRecentFacilities();
+    loadAllFacilitiesFromMock();
+};
 
-    window.markAllRead = () => {
-        notifications.forEach(n => n.read = true);
-        renderNotifications('notif-list');
-        renderNotifications('notif-tab-list');
-        updateNotifBadge();
-        showToast('Tüm bildirimler okundu olarak işaretlendi.');
-    };
+// --- GLOBAL HANDLERS (Bridged to window) ---
 
-    window.toggleNotifPanel = () => {
-        const panel = document.getElementById('notif-panel');
-        const overlay = document.getElementById('notif-overlay');
-        const isVisible = panel.style.display === 'block';
-        panel.style.display = isVisible ? 'none' : 'block';
-        overlay.style.display = isVisible ? 'none' : 'block';
-    };
+window.openContentModal = () => {
+    const form = document.getElementById('add-content-form');
+    if (form) form.reset();
+    const overlay = document.getElementById('content-modal-overlay');
+    if (overlay) overlay.style.display = 'flex';
+};
 
-    window.closeNotifPanel = () => {
-        document.getElementById('notif-panel').style.display = 'none';
-        document.getElementById('notif-overlay').style.display = 'none';
-    };
+window.closeContentModal = () => {
+    const overlay = document.getElementById('content-modal-overlay');
+    if (overlay) overlay.style.display = 'none';
+};
 
-    // ─── Add Content Modal ─────────────────────────────────────────────────
-    let selectedContentType = 'facility';
+let selectedContentType = 'facility';
+window.selectContentType = (btn) => {
+    document.querySelectorAll('.content-type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedContentType = btn.getAttribute('data-type');
 
-    window.openContentModal = () => {
-        document.getElementById('content-form').reset();
-        document.getElementById('content-modal-overlay').style.display = 'flex';
-    };
+    document.getElementById('fields-facility').style.display = selectedContentType === 'facility' ? 'block' : 'none';
+    document.getElementById('fields-brand').style.display = selectedContentType === 'brand' ? 'block' : 'none';
+    document.getElementById('fields-event').style.display = selectedContentType === 'event' ? 'block' : 'none';
+};
 
-    window.closeContentModal = () => {
-        document.getElementById('content-modal-overlay').style.display = 'none';
-    };
+window.submitNewContent = (e) => {
+    e.preventDefault();
+    const nameInput = selectedContentType === 'facility' ? 'f-name' : (selectedContentType === 'brand' ? 'b-name' : 'e-name');
+    const name = document.getElementById(nameInput).value;
+    
+    if (selectedContentType === 'facility') {
+        const city = document.getElementById('f-city').value;
+        const category = document.getElementById('f-category').value;
+        window.mockFacilities.unshift({ _type: 'facility', name, city, category, status: 'Beklemede', owner: 'Admin', rating: '7.5' });
+    }
 
-    window.selectContentType = (btn) => {
-        document.querySelectorAll('.content-type-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedContentType = btn.getAttribute('data-type');
+    window.closeContentModal();
+    if (typeof window.showToast === 'function') window.showToast(`"${name}" eklendi!`);
+    loadAllFacilitiesFromMock();
+    loadRecentFacilities();
+};
 
-        // Show / hide correct form section
-        document.getElementById('fields-facility').style.display = selectedContentType === 'facility' ? 'block' : 'none';
-        document.getElementById('fields-brand').style.display = selectedContentType === 'brand' ? 'block' : 'none';
-        document.getElementById('fields-event').style.display = selectedContentType === 'event' ? 'block' : 'none';
+window.openEditModal = (index) => {
+    const f = window.mockFacilities[index];
+    if (!f) return;
+    document.getElementById('edit-index').value = index;
+    document.getElementById('edit-name').value = f.name;
+    document.getElementById('edit-category').value = f.category || '';
+    document.getElementById('edit-city').value = f.city || '';
+    document.getElementById('edit-modal-overlay').style.display = 'flex';
+};
 
-        // Update modal title
-        const titles = { facility: '🏢 Yeni Tesis Ekle', brand: '🏷️ Yeni Marka Ekle', event: '📅 Yeni Etkinlik Ekle' };
-        document.getElementById('modal-main-title').textContent = titles[selectedContentType] || 'Yeni İçerik Ekle';
-    };
+window.closeEditModal = () => {
+    document.getElementById('edit-modal-overlay').style.display = 'none';
+};
 
-    window.submitNewContent = (e) => {
-        e.preventDefault();
-        let newItem, name, notifBody;
-
-        if (selectedContentType === 'facility') {
-            name = document.getElementById('f-name').value;
-            const city = document.getElementById('f-city').value;
-            const category = document.getElementById('f-category').value;
-            const address = document.getElementById('f-address').value;
-            const phone = document.getElementById('f-phone').value;
-            const website = document.getElementById('f-website').value;
-            const openT = document.getElementById('f-open').value;
-            const closeT = document.getElementById('f-close').value;
-            const desc = document.getElementById('f-desc').value;
-            const owner = document.getElementById('f-owner').value || 'Admin';
-            const score = document.getElementById('f-score').value;
-            const img = document.getElementById('f-image').value;
-            newItem = { _type: 'facility', name, city, category, address, phone, website, hours: `${openT}–${closeT}`, desc, owner, rating: score, status: 'Beklemede', image: img };
-            notifBody = `${name} (${category}, ${city}) tesisi sisteme eklendi.`;
-            mockFacilities.unshift(newItem);
-            loadAllFacilitiesFromMock();
-            loadRecentFacilities();
-
-        } else if (selectedContentType === 'brand') {
-            name = document.getElementById('b-name').value;
-            const type = document.getElementById('b-type').value;
-            const country = document.getElementById('b-country').value;
-            const website = document.getElementById('b-website').value;
-            const email = document.getElementById('b-email').value;
-            const instagram = document.getElementById('b-instagram').value;
-            const desc = document.getElementById('b-desc').value;
-            const score = document.getElementById('b-score').value;
-            const isPartner = document.getElementById('b-partner').value === '1';
-            newItem = { _type: 'brand', name, category: type, city: country || 'Türkiye', website, email, instagram, desc, owner: 'Marka', rating: score, status: isPartner ? 'Aktif' : 'Beklemede' };
-            notifBody = `${name} (${type}) markası sisteme eklendi.`;
-            mockFacilities.unshift(newItem);
-            loadAllFacilitiesFromMock();
-
-        } else if (selectedContentType === 'event') {
-            name = document.getElementById('e-name').value;
-            const type = document.getElementById('e-type').value;
-            const city = document.getElementById('e-city').value;
-            const date = document.getElementById('e-date').value;
-            const time = document.getElementById('e-time').value;
-            const location = document.getElementById('e-location').value;
-            const capacity = document.getElementById('e-capacity').value;
-            const price = document.getElementById('e-price').value;
-            const organizer = document.getElementById('e-organizer').value;
-            const desc = document.getElementById('e-desc').value;
-            newItem = { _type: 'event', name, category: type, city, address: `${location} – ${date} ${time}`, owner: organizer || 'Admin', rating: '8.0', status: 'Beklemede', price, capacity, desc };
-            notifBody = `${name} (${type}, ${city}) etkinliği ${date} tarihli olarak eklendi.`;
-            mockFacilities.unshift(newItem);
-            loadAllFacilitiesFromMock();
-        }
-
-        document.getElementById('content-modal-overlay').style.display = 'none';
-        showToast(`"${name}" başarıyla sisteme eklendi!`);
-
-        notifications.unshift({ id: Date.now(), title: 'Yeni İçerik Eklendi', body: notifBody, read: false, time: 'Az önce' });
-        renderNotifications('notif-list');
-        renderNotifications('notif-tab-list');
-        updateNotifBadge();
-    };
-
-    // ─── Edit Modal ────────────────────────────────────────────────────────
-    window.openEditModal = (index) => {
-        const idx = parseInt(index);
-        const f = mockFacilities[idx];
-        if (!f) return;
-        
-        const typeLabels = { facility: 'Tesis', brand: 'Marka', event: 'Etkinlik' };
-        document.getElementById('edit-modal-title').textContent = `${typeLabels[f._type] || 'İçerik'} Düzenle`;
-        
-        document.getElementById('edit-index').value = idx;
-        document.getElementById('edit-name').value = f.name || '';
-        document.getElementById('edit-category').value = f.category || '';
-        document.getElementById('edit-city').value = f.city || '';
-        document.getElementById('edit-score').value = f.rating || 7.5;
-        document.getElementById('edit-status').value = f.status || 'Aktif';
-
-        // Facility extra fields
-        const extra = document.getElementById('edit-facility-extra');
-        if (f._type === 'facility') {
-            extra.style.display = 'grid';
-            document.getElementById('edit-phone').value = f.phone || '';
-            document.getElementById('edit-desc').value = f.desc || '';
-            document.getElementById('edit-image').value = f.image || '';
-            if (f.hours && f.hours.includes('–')) {
-                const [o, c] = f.hours.split('–');
-                document.getElementById('edit-open').value = o.trim();
-                document.getElementById('edit-close').value = c.trim();
-            } else {
-                document.getElementById('edit-open').value = '09:00';
-                document.getElementById('edit-close').value = '22:00';
-            }
-        } else {
-            extra.style.display = 'none';
-        }
-
-        document.getElementById('edit-modal-overlay').style.display = 'flex';
-    };
-
-    window.closeEditModal = () => {
-        document.getElementById('edit-modal-overlay').style.display = 'none';
-    };
-
-    window.submitEditContent = (e) => {
-        e.preventDefault();
-        const idx = parseInt(document.getElementById('edit-index').value);
-        if (isNaN(idx) || !mockFacilities[idx]) return;
-        
-        const f = mockFacilities[idx];
+window.submitEditContent = (e) => {
+    e.preventDefault();
+    const idx = document.getElementById('edit-index').value;
+    const f = window.mockFacilities[idx];
+    if (f) {
         f.name = document.getElementById('edit-name').value;
         f.category = document.getElementById('edit-category').value;
         f.city = document.getElementById('edit-city').value;
-        f.rating = document.getElementById('edit-score').value;
-        f.status = document.getElementById('edit-status').value;
-        
-        if (f._type === 'facility') {
-            f.phone = document.getElementById('edit-phone').value;
-            f.desc = document.getElementById('edit-desc').value;
-            f.image = document.getElementById('edit-image').value;
-            const openT = document.getElementById('edit-open').value;
-            const closeT = document.getElementById('edit-close').value;
-            f.hours = `${openT}–${closeT}`;
-        }
-        
-        loadAllFacilitiesFromMock();
-        loadRecentFacilities();
-        document.getElementById('edit-modal-overlay').style.display = 'none';
-        showToast(`"${f.name}" başarıyla güncellendi!`);
-    };
-
-    // ─── User Edit Modal ───────────────────────────────────────────────────
-    window.openUserEditModal = (userId) => {
-        const u = allUsers.find(x => String(x.id) === String(userId));
-        if (!u) return;
-        document.getElementById('edit-user-id').value = u.id;
-        document.getElementById('edit-user-name').value = u.name;
-        document.getElementById('edit-user-role').value = u.role;
-        document.getElementById('edit-user-points').value = u.points || 0;
-        document.getElementById('edit-user-modal-overlay').style.display = 'flex';
-    };
-
-    window.closeUserEditModal = () => {
-        document.getElementById('edit-user-modal-overlay').style.display = 'none';
-    };
-
-    window.submitUserEdit = (e) => {
-        e.preventDefault();
-        const id = document.getElementById('edit-user-id').value;
-        const uIdx = allUsers.findIndex(x => String(x.id) === String(id));
-        if (uIdx === -1) return;
-
-        allUsers[uIdx].name = document.getElementById('edit-user-name').value;
-        allUsers[uIdx].role = document.getElementById('edit-user-role').value;
-        allUsers[uIdx].points = parseInt(document.getElementById('edit-user-points').value) || 0;
-
-        renderUserTable(allUsers);
-        closeUserEditModal();
-        showToast(`${allUsers[uIdx].name} bilgileri güncellendi!`);
-    };
-
-
-
-    // ─── Global Search ─────────────────────────────────────────────────────
-    window.doGlobalSearch = (query) => {
-        if (!query.trim()) return;
-        switchTab('users');
-        setTimeout(() => {
-            document.getElementById('user-search').value = query;
-            filterUserTable(query);
-        }, 100);
-    };
-
-    // ─── Toast helper ──────────────────────────────────────────────────────
-    function showToast(msg) {
-        const existing = document.querySelector('.toast-dash');
-        if (existing) existing.remove();
-        const t = document.createElement('div');
-        t.className = 'toast-dash';
-        t.textContent = msg;
-        document.body.appendChild(t);
-        setTimeout(() => t.remove(), 3200);
     }
-
-    // ─── Settings Save ─────────────────────────────────────────────────────
-    window.saveSettings = () => {
-        const siteName = document.getElementById('setting-site-name')?.value || 'Sporpuan';
-        const autoPending = document.getElementById('setting-auto-pending')?.checked;
-        const emailNotif = document.getElementById('setting-email-notif')?.checked;
-        const qrActive = document.getElementById('setting-qr-active')?.checked;
-        const facPts = document.getElementById('setting-facility-pts')?.value;
-        const evtPts = document.getElementById('setting-event-pts')?.value;
-
-        localStorage.setItem('sporpuan_settings', JSON.stringify({ siteName, autoPending, emailNotif, qrActive, facPts, evtPts }));
-        showToast('Sistem ayarları kaydedildi! ✓');
-    };
-
-    // On load, restore settings
-    const saved = JSON.parse(localStorage.getItem('sporpuan_settings') || '{}');
-    if (saved.siteName && document.getElementById('setting-site-name')) document.getElementById('setting-site-name').value = saved.siteName;
-    if (saved.autoPending !== undefined && document.getElementById('setting-auto-pending')) document.getElementById('setting-auto-pending').checked = saved.autoPending;
-    if (saved.emailNotif !== undefined && document.getElementById('setting-email-notif')) document.getElementById('setting-email-notif').checked = saved.emailNotif;
-    if (saved.qrActive !== undefined && document.getElementById('setting-qr-active')) document.getElementById('setting-qr-active').checked = saved.qrActive;
-    if (saved.facPts && document.getElementById('setting-facility-pts')) document.getElementById('setting-facility-pts').value = saved.facPts;
-    if (saved.evtPts && document.getElementById('setting-event-pts')) document.getElementById('setting-event-pts').value = saved.evtPts;
-
-    // ─── Tab Navigation ────────────────────────────────────────────────────
-    const tabTitles = {
-        overview: 'Genel Bakış', users: 'Kullanıcılar', facilities: 'Tesisler & Markalar',
-        reviews: 'Yorumlar', notifications: 'Bildirimler', settings: 'Sistem Ayarları'
-    };
-
-    const allViewIds = ['content-overview', 'content-users', 'content-facilities', 'content-reviews', 'content-notifications', 'content-settings'];
-    const pageTitle = document.getElementById('page-title');
-    const tabs = document.querySelectorAll('.ds-nav-item');
-
-    window.switchTab = (tabName) => {
-        tabs.forEach(t => t.classList.remove('active'));
-        const activeTab = document.querySelector(`.ds-nav-item[data-tab="${tabName}"]`);
-        if (activeTab) activeTab.classList.add('active');
-
-        allViewIds.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.style.display = 'none';
-        });
-
-        const target = document.getElementById(`content-${tabName}`);
-        if (target) target.style.display = 'flex';
-        if (pageTitle) pageTitle.textContent = tabTitles[tabName] || tabName;
-    };
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            switchTab(tab.getAttribute('data-tab'));
-        });
-    });
-
-    // ─── Sidebar Toggle (Desktop & Mobile) ─────────────────────────
-
-    if (desktopToggleBtn && sidebar) {
-        desktopToggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
-    }
-
-    if (mobileSidebarBtn && sidebar) {
-        mobileSidebarBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('mobile-open');
-        });
-    }
-
-    // Close mobile sidebars on nav clicks
-    document.querySelectorAll('.ds-nav-item').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (window.innerWidth <= 1024) {
-                sidebar.classList.remove('mobile-open');
-            }
-        });
-    });
-
-    // ─── Stats Load ────────────────────────────────────────────────────────
-    async function loadStats() {
-        try {
-            const res = await fetch('/api/admin/stats');
-            const data = await res.json();
-            document.getElementById('stat-users').textContent = Math.max(data.totalUsers || 1, allUsers.length);
-            document.getElementById('stat-reviews').textContent = Math.max(data.totalReviews || 6, mockReviews.length);
-            document.getElementById('stat-facilities').textContent = mockFacilities.length;
-            
-            const pendingReviews = mockReviews.filter(r => r.status === 'Beklemede').length;
-            document.getElementById('pending-comments-badge').textContent = pendingReviews;
-
-            const totalPts = allUsers.reduce((s, u) => s + (u.points || 0), 0);
-            if (document.getElementById('stat-qr-points')) document.getElementById('stat-qr-points').textContent = totalPts;
-        } catch (e) {
-            document.getElementById('stat-users').textContent = allUsers.length;
-            document.getElementById('stat-facilities').textContent = mockFacilities.length;
-            document.getElementById('stat-reviews').textContent = mockReviews.length;
-            if (document.getElementById('stat-qr-points')) {
-               const totalPts = allUsers.reduce((s, u) => s + (u.points || 0), 0);
-               document.getElementById('stat-qr-points').textContent = totalPts;
-            }
-        }
-    }
-
-
-    // ─── Recent Facilities ─────────────────────────────────────────────────
-    const mockFacilities = [
-        { _type: 'facility', name: 'Bursa Spor Merkezi', city: 'Bursa', status: 'Aktif', category: 'Spor Salonu', owner: 'Admin', rating: '8.5' },
-        { _type: 'facility', name: 'Kadıköy Basketbol', city: 'İstanbul', status: 'Aktif', category: 'Açık Saha', owner: 'Admin', rating: '7.8' },
-        { _type: 'facility', name: 'İzmir Tenis Akademisi', city: 'İzmir', status: 'Beklemede', category: 'Tenis Kortu', owner: 'Partner', rating: '8.8' },
-        { _type: 'brand', name: 'Nike Türkiye', city: 'İstanbul', status: 'Aktif', category: 'Spor Giyim', owner: 'Marka', rating: '9.5' },
-        { _type: 'brand', name: 'Adidas Academy', city: 'Ankara', status: 'Aktif', category: 'Ayakkabı', owner: 'Marka', rating: '9.2' },
-        { _type: 'event', name: 'İstanbul Maratonu', city: 'İstanbul', status: 'Yaklaşan', category: 'Maraton', owner: 'İBB', rating: '9.0' },
-        { _type: 'event', name: 'Bursa Bisiklet Turu', city: 'Bursa', status: 'Beklemede', category: 'Festival', owner: 'Bursa Bel.', rating: '8.2' },
-        { _type: 'facility', name: 'Antalya Outdoor Yaşam', city: 'Antalya', status: 'Aktif', category: 'Outdoor', owner: 'Partner', rating: '9.0' },
-        { _type: 'facility', name: 'Trabzon Fitness Center', city: 'Trabzon', status: 'Aktif', category: 'Fitness', owner: 'Partner', rating: '8.1' },
-    ];
-
-    function loadRecentFacilities() {
-        const tbody = document.getElementById('table-recent-facilities');
-        if (!tbody) return;
-        tbody.innerHTML = mockFacilities.slice(0, 4).map(f => `
-            <tr>
-                <td><strong>${f.name}</strong></td>
-                <td>${f.city}</td>
-                <td><span class="status-badge ${f.status === 'Aktif' ? 'active' : 'pending'}">${f.status}</span></td>
-            </tr>
-        `).join('');
-    }
-
-    // ─── Recent Reviews (Overview) ─────────────────────────────────────────
-    const mockReviews = [
-        { user: 'Ahmet Y.', content: 'Çok temiz ve güvenilir bir salon.', facility: 'Bursa Spor Merkezi', status: 'Beklemede', date: '17.04.2026' },
-        { user: 'Selin K.', content: 'Eğitmenler ilgisiz galiba.', facility: 'İzmir Tenis Akademisi', status: 'Beklemede', date: '17.04.2026' },
-        { user: 'Can T.', content: 'Harika bir deneyimdi, kesinlikle tavsiye ederim!', facility: 'Ankara Olimpik Havuzu', status: 'Onaylı', date: '16.04.2026' },
-        { user: 'Mert K.', content: 'Fiyat kalite dengesi mükemmel.', facility: 'Trabzon Fitness', status: 'Onaylı', date: '15.04.2026' },
-        { user: 'Leyla K.', content: 'Parkur çok iyi düzenlenmiş.', facility: 'Antalya Outdoor', status: 'Beklemede', date: '15.04.2026' },
-    ];
-
-    function reviewActionBtns(index) {
-        return `
-            <button class="btn-icon" title="Onayla" onclick="approveReview(${index})">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            </button>
-            <button class="btn-icon danger" title="Reddet" onclick="rejectReview(${index})">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"></path></svg>
-            </button>
-        `;
-    }
-
-    window.approveReview = (i) => {
-        mockReviews[i].status = 'Onaylı';
-        loadRecentReviews();
-        loadAllReviews();
-        loadStats();
-        showToast(`${mockReviews[i].user} yorumu onaylandı!`);
-    };
-    window.rejectReview = (i) => {
-        mockReviews[i].status = 'Reddedildi';
-        loadRecentReviews();
-        loadAllReviews();
-        showToast(`${mockReviews[i].user} yorumu reddedildi.`);
-    };
-
-    function loadRecentReviews() {
-        const tbody = document.getElementById('table-recent-reviews');
-        if (!tbody) return;
-        tbody.innerHTML = mockReviews.slice(0, 3).map((r, i) => `
-            <tr>
-                <td><div class="flex-center"><div class="avatar" style="width:28px;height:28px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;">${r.user[0]}</div>&nbsp;<strong>${r.user}</strong></div></td>
-                <td><div style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${r.content}</div></td>
-                <td>${reviewActionBtns(i)}</td>
-            </tr>
-        `).join('');
-    }
-
-    // ─── All Users tab ─────────────────────────────────────────────────────
-    let allUsers = [];
-
-    async function loadAllUsers() {
-        try {
-            const res = await fetch('/api/admin/users');
-            allUsers = await res.json();
-        } catch {
-            allUsers = [{ id: 1, name: 'Selman Utku', email: 'selmanutkumarmara@gmail.com', role: 'Admin', points: 0, regDate: '01.01.2026' }];
-        }
-        renderUserTable(allUsers);
-    }
-
-    function renderUserTable(data) {
-        const tbody = document.getElementById('table-all-users');
-        if (!tbody) return;
-        tbody.innerHTML = data.map(u => `
-            <tr>
-                <td><div class="flex-col"><strong>${u.name}</strong><span class="small-lbl">ID: #${u.id}</span></div></td>
-                <td>${u.email}</td>
-                <td><span class="status-badge ${u.role === 'Admin' ? 'admin' : 'user'}">${u.role}</span></td>
-                <td><strong style="color:#10b981;">${u.points || 0} 🏅</strong></td>
-                <td>${u.regDate || '16.02.2026'}</td>
-                <td>
-                    <button class="btn-icon" title="Düzenle" onclick="openUserEditModal('${u.id}')">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    </button>
-                    <button class="btn-icon danger" title="Sil" onclick="deleteUser('${u.id}')">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </button>
-                </td>
-
-            </tr>
-        `).join('');
-    }
-
-    window.filterUserTable = (query) => {
-        const role = document.getElementById('user-role-filter')?.value || '';
-        const q = (query || '').toLowerCase();
-        const filtered = allUsers.filter(u =>
-            (!q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)) &&
-            (!role || u.role === role)
-        );
-        renderUserTable(filtered);
-    };
-
-    window.deleteUser = async (id) => {
-        if (!confirm('Kullanıcıyı silmek istediğinize emin misiniz?')) return;
-        try {
-            await fetch(`/api/admin/delete-user/${id}`, { method: 'DELETE' });
-        } catch { /* offline */ }
-        allUsers = allUsers.filter(u => String(u.id) !== String(id));
-        renderUserTable(allUsers);
-        loadStats();
-        showToast('Kullanıcı silindi.');
-    };
-
-    // ─── All Facilities tab ────────────────────────────────────────────────
-    function loadAllFacilitiesFromMock(data = null) {
-        const tbody = document.getElementById('table-all-facilities');
-        if (!tbody) return;
-        const displayData = data || mockFacilities;
-        tbody.innerHTML = displayData.map((f, i) => {
-            // Find real index for editing if filtered
-            const realIdx = mockFacilities.indexOf(f);
-            return `
-                <tr>
-                    <td><div class="flex-col"><strong>${f.name}</strong><span class="small-lbl">Sahibi: ${f.owner}</span></div></td>
-                    <td>${f.category}</td>
-                    <td>${f.city}</td>
-                    <td><strong>⭐ ${parseFloat(f.rating).toFixed(1)}</strong></td>
-                    <td><span class="status-badge ${f.status === 'Aktif' ? 'active' : 'pending'}">${f.status}</span></td>
-                    <td>
-                        <button class="btn-icon" title="Düzenle" onclick="openEditModal(${realIdx})">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                        </button>
-                        <button class="btn-icon danger" title="Kaldır" onclick="removeFacility(${realIdx})">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-                        </button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    }
-
-
-    window.removeFacility = (i) => {
-        if (!confirm(`"${mockFacilities[i].name}" tesisini kaldırmak istediğinize emin misiniz?`)) return;
-        const name = mockFacilities[i].name;
-        mockFacilities.splice(i, 1);
-        loadAllFacilitiesFromMock();
-        loadRecentFacilities();
-        showToast(`"${name}" kaldırıldı.`);
-    };
-
-    window.filterFacilityTable = (query) => {
-        const q = (query || '').toLowerCase();
-        const typeFilter = document.getElementById('facility-type-filter')?.value || '';
-        
-        const filtered = mockFacilities.filter(f => {
-            const matchesSearch = f.name.toLowerCase().includes(q) || f.city.toLowerCase().includes(q);
-            const matchesType = !typeFilter || f._type === typeFilter || 
-                                (typeFilter === 'facility' && !f._type); // Fallback for legacy mock
-            return matchesSearch && matchesType;
-        });
-        
-        loadAllFacilitiesFromMock(filtered);
-    };
-
-
-    // ─── All Reviews tab ───────────────────────────────────────────────────
-    function loadAllReviews(statusFilter = '') {
-        const tbody = document.getElementById('table-all-reviews');
-        if (!tbody) return;
-        const data = statusFilter ? mockReviews.filter(r => r.status === statusFilter) : mockReviews;
-        tbody.innerHTML = data.map((r, i) => `
-            <tr>
-                <td class="small-lbl">${r.date}</td>
-                <td><strong>${r.user}</strong></td>
-                <td>${r.facility}</td>
-                <td><div style="max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${r.content}">${r.content}</div></td>
-                <td><span class="status-badge ${r.status === 'Onaylı' ? 'active' : r.status === 'Reddedildi' ? 'admin' : 'pending'}">${r.status}</span></td>
-                <td>${reviewActionBtns(i)}</td>
-            </tr>
-        `).join('');
-    }
-
-    window.filterReviewTable = (status) => loadAllReviews(status);
-
-    // ─── showToast global ──────────────────────────────────────────────────
-    window.showToast = showToast;
-
-    // ─── Initialize ────────────────────────────────────────────────────────
-    loadStats();
-    loadRecentFacilities();
-    loadRecentReviews();
-    loadAllUsers();
+    window.closeEditModal();
     loadAllFacilitiesFromMock();
-    loadAllReviews();
-});
+    if (typeof window.showToast === 'function') window.showToast("Değişiklikler kaydedildi.");
+};
+
+// --- DATA RENDERS ---
+
+function loadRecentFacilities() {
+    const tbody = document.getElementById('table-recent-facilities');
+    if (!tbody || !window.mockFacilities) return;
+    tbody.innerHTML = window.mockFacilities.slice(0, 4).map(f => `
+        <tr>
+            <td><strong>${f.name}</strong></td>
+            <td>${f.city}</td>
+            <td><span class="status-badge ${f.status === 'Aktif' ? 'active' : 'pending'}">${f.status}</span></td>
+        </tr>
+    `).join('');
+}
+
+function loadAllFacilitiesFromMock() {
+    const tbody = document.getElementById('table-all-facilities');
+    if (!tbody || !window.mockFacilities) return;
+    tbody.innerHTML = window.mockFacilities.map((f, i) => `
+        <tr>
+            <td><strong>${f.name}</strong></td>
+            <td>${f.category}</td>
+            <td>${f.city}</td>
+            <td><span class="status-badge ${f.status === 'Aktif' ? 'active' : 'pending'}">${f.status}</span></td>
+            <td>
+                <button class="btn-icon" onclick="openEditModal(${i})">✏️</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+async function loadStats() {
+    const sUsers = document.getElementById('stat-users');
+    if (sUsers) sUsers.textContent = window.allUsers?.length || '0';
+    const sFacs = document.getElementById('stat-facilities');
+    if (sFacs) sFacs.textContent = window.mockFacilities?.length || '0';
+}
+
+// Auto-init if DOM is ready (fallback)
+if (document.readyState === 'complete') window.initDashboardLogic();
+else window.addEventListener('load', window.initDashboardLogic);

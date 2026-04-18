@@ -659,6 +659,17 @@
                         <input type="password" placeholder="••••••••" required>
                     </div>
                     <button type="submit" class="primary-btn partner-btn">Partner Girişi</button>
+                    <div style="text-align:center; margin-top:1rem;">
+                        <div style="display:flex; align-items:center; gap:0.8rem; margin-bottom:0.8rem;">
+                            <div style="flex:1; height:1px; background:#e2e8f0;"></div>
+                            <span style="font-size:0.8rem; color:#94a3b8; font-weight:600;">veya</span>
+                            <div style="flex:1; height:1px; background:#e2e8f0;"></div>
+                        </div>
+                        <button type="button" onclick="handlePartnerDemoLogin()" style="width:100%; padding:0.9rem; border-radius:12px; border:2px solid var(--sporpuan-green); background:linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%); color:#059669; font-size:1rem; font-weight:700; cursor:pointer; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:0.6rem; transition:all 0.3s;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                            Demo Giriş
+                        </button>
+                    </div>
                 </form>
             </div>
 
@@ -815,16 +826,57 @@
 
     <!-- ENHANCED MANAGEMENT DASHBOARD VIEW -->
     <div id="dashboard-view" style="display: none;" class="dashboard-view">
-        <header class="dash-header">
-            <div class="dash-title">
-                <h1>Yönetim Paneli</h1>
-                <p>Sporpuan platformu genel performans ve etkileşim özetiniz.</p>
+        <aside class="dash-sidebar">
+            <div class="ds-header">
+                <div class="logo">
+                    <img src="sporpuan_logo_new.png" alt="Sporpuan">
+                    <span class="logo-text">Sporpuan</span>
+                </div>
             </div>
-            <div class="dash-actions">
-                <button class="auth-submit-btn" style="padding: 0.8rem 1.5rem; background: #fff; color: var(--sporpuan-navy); border: 1px solid #e2e8f0;">Rapor İndir</button>
-                <button class="auth-submit-btn" style="padding: 0.8rem 1.5rem;">+ Yeni Etkinlik</button>
+            
+            <nav class="ds-nav">
+                <div class="ds-nav-group">Menü</div>
+                <button class="ds-nav-item active" data-tab="overview">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                    <span>Genel Bakış</span>
+                </button>
+                <button class="ds-nav-item" data-tab="facilities">
+                    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    <span>Tesisler & Markalar</span>
+                </button>
+                <button class="ds-nav-item" data-tab="reviews">
+                    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span>Yorumlar</span>
+                </button>
+                
+                <div class="ds-nav-group" style="margin-top:2rem;">Ayarlar</div>
+                <button class="ds-nav-item" data-tab="settings">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <span>Sistem Ayarları</span>
+                </button>
+            </nav>
+            
+            <div class="ds-footer">
+                <a href="#" onclick="showHome()" class="ds-logout"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> <span>Ana Site</span></a>
             </div>
-        </header>
+        </aside>
+
+        <main class="dash-main">
+            <header class="dash-topbar">
+                <div class="dt-title" style="display:flex; align-items:center; gap:0.5rem;">
+                    <button class="mobile-sidebar-toggle" id="mobile-sidebar-btn">
+                        <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                    </button>
+                    <button class="sidebar-toggle-btn desktop-only" id="sidebar-toggle">
+                        <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                    </button>
+                    <h1 id="dash-page-title">Genel Bakış</h1>
+                </div>
+                <div class="dash-actions">
+                    <button class="auth-submit-btn" style="padding: 0.6rem 1.2rem; background: #fff; color: var(--sporpuan-navy); border: 1px solid #e2e8f0;">Rapor İndir</button>
+                    <button class="auth-submit-btn" onclick="openContentModal()" style="padding: 0.6rem 1.2rem;">+ Yeni İçerik</button>
+                </div>
+            </header>
 
         <div class="dash-grid">
             <div class="dash-stat-card">
@@ -1420,6 +1472,66 @@
         </div>
     </div>
 
+    <!-- DASHBOARD MODALS (Migrated from dashboard.html) -->
+    <!-- ADD CONTENT MODAL -->
+    <div id="content-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:1101; align-items:center; justify-content:center; overflow-y:auto; padding:2rem 0;">
+        <div id="content-modal-box" style="background:#fff; border-radius:20px; width:100%; max-width:620px; box-shadow:0 30px 80px rgba(0,0,0,.2); position:relative; margin:auto;">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:1.75rem 2rem 0;">
+                <div>
+                    <h3 id="modal-main-title" style="margin:0 0 0.25rem; font-size:1.3rem; font-weight:800; color:#0f172a;">Yeni İçerik Ekle</h3>
+                    <p style="margin:0; color:#64748b; font-size:0.85rem;">Türü seçin ve alanları doldurun.</p>
+                </div>
+                <button onclick="closeContentModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:34px; height:34px; cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center;">✕</button>
+            </div>
+            <!-- Type Selector -->
+            <div style="display:flex; gap:0.6rem; padding:1.25rem 2rem; border-bottom:1px solid #f1f5f9;">
+                <button class="content-type-btn active" data-type="facility" onclick="selectContentType(this)">🏢 Tesis</button>
+                <button class="content-type-btn" data-type="brand" onclick="selectContentType(this)">🏷️ Marka</button>
+                <button class="content-type-btn" data-type="event" onclick="selectContentType(this)">📅 Etkinlik</button>
+            </div>
+            <form id="add-content-form" onsubmit="submitNewContent(event)" style="padding:1.5rem 2rem 2rem;">
+                <!-- Tesis Form -->
+                <div id="fields-facility">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                        <div style="grid-column:1/-1;"><label class="fld-label">Tesis Adı *</label><input type="text" id="f-name" required placeholder="Örn: Bursa Fitness Plus" class="fld-input"></div>
+                        <div><label class="fld-label">Kategori</label><select id="f-category" class="fld-input"><option>Fitness</option><option>Yüzme Havuzu</option><option>Tenis Kortu</option><option>Açık Saha</option><option>Spor Salonu</option><option>Outdoor</option></select></div>
+                        <div><label class="fld-label">Şehir</label><select id="f-city" class="fld-input"><option>İstanbul</option><option>Bursa</option><option>İzmir</option><option>Ankara</option></select></div>
+                        <div style="grid-column:1/-1;"><label class="fld-label">Görsel URL</label><input type="url" id="f-image" placeholder="https://..." class="fld-input"></div>
+                    </div>
+                </div>
+                <div id="fields-brand" style="display:none;"><div style="padding:1rem; color:#64748b; text-align:center;">Marka bilgileri yakında...</div></div>
+                <div id="fields-event" style="display:none;"><div style="padding:1rem; color:#64748b; text-align:center;">Etkinlik bilgileri yakında...</div></div>
+                
+                <div style="display:flex; gap:0.75rem; justify-content:flex-end; padding-top:1rem; border-top:1px solid #f1f5f9;">
+                    <button type="button" onclick="closeContentModal()" style="background:#f1f5f9; border:none; border-radius:10px; padding:0.75rem 1.5rem; cursor:pointer;">İptal</button>
+                    <button type="submit" style="background:#0f172a; color:#fff; border:none; border-radius:10px; padding:0.75rem 1.75rem; cursor:pointer; font-weight:700;">Kaydet & Ekle ✓</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div id="edit-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:1102; align-items:center; justify-content:center; overflow-y:auto;">
+        <div style="background:#fff; border-radius:20px; width:100%; max-width:620px; box-shadow:0 30px 80px rgba(0,0,0,.2); position:relative; margin:auto;">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:1.75rem 2rem 0;">
+                <h3 id="edit-modal-title" style="margin:0; font-size:1.2rem; font-weight:800; color:#0f172a;">Düzenle</h3>
+                <button onclick="closeEditModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:34px; height:34px; cursor:pointer;">✕</button>
+            </div>
+            <form id="edit-content-form" onsubmit="submitEditContent(event)" style="padding:1.5rem 2rem 2rem;">
+                <input type="hidden" id="edit-index">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                    <div style="grid-column:1/-1;"><label class="fld-label">İsim</label><input type="text" id="edit-name" required class="fld-input"></div>
+                    <div><label class="fld-label">Kategori</label><input type="text" id="edit-category" class="fld-input"></div>
+                    <div><label class="fld-label">Şehir</label><input type="text" id="edit-city" class="fld-input"></div>
+                </div>
+                <div style="display:flex; gap:0.75rem; justify-content:flex-end; padding-top:1rem; border-top:1px solid #f1f5f9; margin-top:1rem;">
+                    <button type="submit" style="background:#0f172a; color:#fff; border:none; border-radius:10px; padding:0.75rem 1.75rem; cursor:pointer; font-weight:700;">Güncelle ✓</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="app.js"></script>
+    <script src="dashboard.js"></script>
 </body>
 </html>
