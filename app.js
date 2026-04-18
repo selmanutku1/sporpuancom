@@ -97,6 +97,52 @@ document.addEventListener('DOMContentLoaded', () => {
             operating_hours: '03 Kasım 2026'
         }
     ];
+    const demoFacilities = [
+        {
+            id: 'f1', name: 'Bursa Spor Merkezi', category_name: 'Spor Salonu', city: 'Bursa',
+            cover_image_url: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&fit=crop',
+            sporpuan_score: 8.5, facility_score: 8.8, trainers_score: 8.2, experience_score: 8.0, safety_score: 9.0, value_score: 7.8,
+            description: 'Modern ekipmanlarla donatılmış, geniş kapasiteli profesyonel spor merkezi.',
+            total_reviews: 47, address: 'Nilüfer, Bursa'
+        },
+        {
+            id: 'f2', name: 'Kadıköy Basketbol Sahası', category_name: 'Açık Saha', city: 'İstanbul',
+            cover_image_url: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&fit=crop',
+            sporpuan_score: 7.8, facility_score: 7.5, trainers_score: 8.0, experience_score: 8.2, safety_score: 7.0, value_score: 8.5,
+            description: 'Kadıköy sahilinde yer alan, ücretsiz erişimli açık hava basketbol sahası.',
+            total_reviews: 120, address: 'Caferağa, Kadıköy'
+        },
+        {
+            id: 'f3', name: 'Ankara Olimpik Yüzme Havuzu', category_name: 'Yüzme Havuzu', city: 'Ankara',
+            cover_image_url: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=800&fit=crop',
+            sporpuan_score: 9.2, facility_score: 9.5, trainers_score: 9.0, experience_score: 8.8, safety_score: 9.6, value_score: 8.2,
+            description: 'Olimpik standartlarda 50m havuz, profesyonel yüzme eğitmenleri ve modern soyunma odaları.',
+            total_reviews: 230, address: 'Eryaman, Ankara'
+        },
+        {
+            id: 'f4', name: 'İzmir Tenis Akademisi', category_name: 'Tenis Kortu', city: 'İzmir',
+            cover_image_url: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&fit=crop',
+            sporpuan_score: 8.8, facility_score: 9.0, trainers_score: 9.2, experience_score: 8.5, safety_score: 8.8, value_score: 8.0,
+            description: 'Profesyonel antrenörler eşliğinde, 8 adet hard court ve 4 adet toprak kort.',
+            total_reviews: 95, address: 'Bornova, İzmir'
+        },
+        {
+            id: 'f5', name: 'Antalya Outdoor Yaşam', category_name: 'Outdoor', city: 'Antalya',
+            cover_image_url: 'https://images.unsplash.com/photo-1501555088652-021faa106b9b?w=800&fit=crop',
+            sporpuan_score: 9.0, facility_score: 8.5, trainers_score: 9.5, experience_score: 9.4, safety_score: 8.8, value_score: 8.2,
+            description: 'Doğa yürüyüşleri, tırmanış ve kamp aktiviteleri için ekipman desteği ve rehberlik hizmeti.',
+            total_reviews: 62, address: 'Konyaaltı, Antalya'
+        },
+        {
+            id: 'f6', name: 'Trabzon Fitness Center', category_name: 'Fitness', city: 'Trabzon',
+            cover_image_url: 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&fit=crop',
+            sporpuan_score: 8.1, facility_score: 8.2, trainers_score: 7.8, experience_score: 8.0, safety_score: 8.5, value_score: 8.3,
+            description: 'Şehir merkezinde, uygun fiyatlı ve 24 saat açık modern fitness salonu.',
+            total_reviews: 65, address: 'Ortahisar, Trabzon'
+        }
+    ];
+
+    window.demoFacilities = demoFacilities; 
 
     // --- Global Functions (Expose immediately for HTML onclick handlers) ---
     window.closeModal = (modal) => { 
@@ -160,13 +206,22 @@ document.addEventListener('DOMContentLoaded', () => {
         let targetId = viewId;
         if (viewId === 'home') targetId = 'home-view';
         if (viewId === 'explore') targetId = 'explore-view';
-        if (viewId === 'profile') targetId = 'profile-view';
+        if (viewId === 'profile' || viewId === 'profile-view') targetId = 'profile-view';
+        if (viewId === 'admin') targetId = 'admin-view';
+        if (viewId === 'dashboard') targetId = 'dashboard-view';
         
         const targetView = document.getElementById(targetId);
         if (targetView) targetView.style.display = 'block';
         
         if (targetId === 'home-view') document.body.classList.add('is-home');
         if (compactFooter) compactFooter.style.display = (targetId === 'home-view') ? 'none' : 'block';
+
+        // Fix Map rendering after view switch
+        if (targetId === 'explore-view' && typeof _exploreMap !== 'undefined' && _exploreMap) {
+            setTimeout(() => {
+                _exploreMap.invalidateSize();
+            }, 100);
+        }
 
         window.scrollTo(0, 0);
         if (window.hideMobileMenu) window.hideMobileMenu();
@@ -277,69 +332,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             
-            if (!response.ok) throw new Error(`Status: ${response.status}`);
-            
-            const data = await response.json();
-            facilitiesData = data;
-            
-            if (data.length === 0) {
-                errorMsg.style.display = 'block';
-                errorMsg.innerHTML = "Tesis bulunamadı.";
-            } else {
-                renderFacilities(facilitiesData);
-                initExploreMap(facilitiesData);
+            let apiData = [];
+            if (response.ok) {
+                apiData = await response.json();
             }
+            
+            // Merge Demo Profiles with API Results
+            facilitiesData = [...demoFacilities, ...apiData];
+            
+            renderFacilities(facilitiesData);
+            initExploreMap(facilitiesData);
+
         } catch (error) {
-            console.warn('API Error, using fallback data:', error);
-            facilitiesData = [
-                {
-                    id: 'f1', name: 'Bursa Spor Merkezi', category_name: 'Spor Salonu', city: 'Bursa',
-                    cover_image_url: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&fit=crop',
-                    sporpuan_score: 8.5, facility_score: 8.8, trainers_score: 8.2, experience_score: 8.0, safety_score: 9.0, value_score: 7.8,
-                    description: 'Modern ekipmanlarla donatılmış, geniş kapasiteli profesyonel spor merkezi.',
-                    total_reviews: 47, address: 'Nilüfer, Bursa'
-                },
-                {
-                    id: 'f2', name: 'Kadıköy Basketbol Sahası', category_name: 'Açık Saha', city: 'İstanbul',
-                    cover_image_url: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&fit=crop',
-                    sporpuan_score: 7.8, facility_score: 7.5, trainers_score: 8.0, experience_score: 8.2, safety_score: 7.0, value_score: 8.5,
-                    description: 'Kadıköy sahilinde yer alan, ücretsiz erişimli açık hava basketbol sahası.',
-                    total_reviews: 120, address: 'Caferağa, Kadıköy'
-                },
-                {
-                    id: 'f3', name: 'Ankara Olimpik Yüzme Havuzu', category_name: 'Yüzme Havuzu', city: 'Ankara',
-                    cover_image_url: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=800&fit=crop',
-                    sporpuan_score: 9.2, facility_score: 9.5, trainers_score: 9.0, experience_score: 8.8, safety_score: 9.6, value_score: 8.2,
-                    description: 'Olimpik standartlarda 50m havuz, profesyonel yüzme eğitmenleri ve modern soyunma odaları.',
-                    total_reviews: 230, address: 'Eryaman, Ankara'
-                },
-                {
-                    id: 'f4', name: 'İzmir Tenis Akademisi', category_name: 'Tenis Kortu', city: 'İzmir',
-                    cover_image_url: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&fit=crop',
-                    sporpuan_score: 8.8, facility_score: 9.0, trainers_score: 9.2, experience_score: 8.5, safety_score: 8.8, value_score: 8.0,
-                    description: 'Profesyonel antrenörler eşliğinde, 8 adet hard court ve 4 adet toprak kort.',
-                    total_reviews: 95, address: 'Bornova, İzmir'
-                },
-                {
-                    id: 'f5', name: 'Antalya Outdoor Yaşam', category_name: 'Outdoor', city: 'Antalya',
-                    cover_image_url: 'https://images.unsplash.com/photo-1501555088652-021faa106b9b?w=800&fit=crop',
-                    sporpuan_score: 9.0, facility_score: 8.5, trainers_score: 9.5, experience_score: 9.4, safety_score: 8.8, value_score: 8.2,
-                    description: 'Doğa yürüyüşleri, tırmanış ve kamp aktiviteleri için ekipman desteği ve rehberlik hizmeti.',
-                    total_reviews: 62, address: 'Konyaaltı, Antalya'
-                },
-                {
-                    id: 'f6', name: 'Trabzon Fitness Center', category_name: 'Fitness', city: 'Trabzon',
-                    cover_image_url: 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&fit=crop',
-                    sporpuan_score: 8.1, facility_score: 8.2, trainers_score: 7.8, experience_score: 8.0, safety_score: 8.5, value_score: 8.3,
-                    description: 'Şehir merkezinde, uygun fiyatlı ve 24 saat açık modern fitness salonu.',
-                    total_reviews: 65, address: 'Ortahisar, Trabzon'
-                }
-            ];
+            console.warn('API Fetch Issue, showing demo data:', error);
+            facilitiesData = [...demoFacilities];
             renderFacilities(facilitiesData);
             initExploreMap(facilitiesData);
         } finally {
             loader.style.display = 'none';
-            errorMsg.style.display = 'none';
         }
     }
 
@@ -1850,39 +1860,65 @@ document.addEventListener('DOMContentLoaded', () => {
     const updReviewsBtn = document.getElementById('upd-reviews-btn');
     const updSettingsBtn = document.getElementById('upd-settings-btn');
     const updLogoutBtn = document.getElementById('upd-logout-btn');
-
-    if (updProfileBtn) updProfileBtn.onclick = () => { if(profileDropdown) profileDropdown.classList.remove('active'); showProfile(); };
     const updAdminBtn = document.getElementById('upd-admin-btn');
-    if (updAdminBtn) updAdminBtn.onclick = () => {
-        if(profileDropdown) profileDropdown.classList.remove('active');
-        switchView('dashboard-view');
-        renderDashboardData();
+
+    const closeDropdown = () => {
+        if (profileDropdown) profileDropdown.classList.remove('active');
     };
-    if (updFavsBtn) updFavsBtn.onclick = () => {
-        if(profileDropdown) profileDropdown.classList.remove('active');
-        showProfile();
-        setTimeout(() => {
-            const favNav = document.querySelector('.ps-nav-item[data-view="favorites"]');
-            if (favNav) favNav.click();
-        }, 100);
-    };
-    if (updReviewsBtn) updReviewsBtn.onclick = () => {
-        if(profileDropdown) profileDropdown.classList.remove('active');
-        showProfile();
-        setTimeout(() => {
-            const revNav = document.querySelector('.ps-nav-item[data-view="reviews"]');
-            if (revNav) revNav.click();
-        }, 100);
-    };
-    if (updSettingsBtn) updSettingsBtn.onclick = () => {
-        if(profileDropdown) profileDropdown.classList.remove('active');
-        showProfile();
-        setTimeout(() => {
-            const setNav = document.querySelector('.ps-nav-item[data-view="settings"]');
-            if (setNav) setNav.click();
-        }, 100);
-    };
-    if (updLogoutBtn) updLogoutBtn.onclick = () => simulateLogout();
+
+    if (updProfileBtn) {
+        updProfileBtn.addEventListener('click', () => {
+            closeDropdown();
+            showProfile();
+        });
+    }
+
+    if (updAdminBtn) {
+        updAdminBtn.addEventListener('click', () => {
+            closeDropdown();
+            switchView('dashboard-view');
+            renderDashboardData();
+        });
+    }
+
+    if (updFavsBtn) {
+        updFavsBtn.addEventListener('click', () => {
+            closeDropdown();
+            showProfile();
+            setTimeout(() => {
+                const favNav = document.querySelector('.ps-nav-item[data-view="favorites"]');
+                if (favNav) favNav.click();
+            }, 100);
+        });
+    }
+
+    if (updReviewsBtn) {
+        updReviewsBtn.addEventListener('click', () => {
+            closeDropdown();
+            showProfile();
+            setTimeout(() => {
+                const revNav = document.querySelector('.ps-nav-item[data-view="reviews"]');
+                if (revNav) revNav.click();
+            }, 100);
+        });
+    }
+    if (updSettingsBtn) {
+        updSettingsBtn.addEventListener('click', () => {
+            closeDropdown();
+            showProfile();
+            setTimeout(() => {
+                const setNav = document.querySelector('.ps-nav-item[data-view="settings"]');
+                if (setNav) setNav.click();
+            }, 100);
+        });
+    }
+
+    if (updLogoutBtn) {
+        updLogoutBtn.addEventListener('click', () => {
+            closeDropdown();
+            simulateLogout();
+        });
+    }
 
     // Profile sidebar logout
     const profLogoutBtn = document.getElementById('prof-logout-btn');
@@ -1935,7 +1971,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Original UI Toggles (Adjusted to showView) ---
     function showProfile() {
-        if (!isLoggedIn) { openModal(loginModal); return; }
+        if (!isLoggedIn) { 
+            if (typeof openModal === 'function') openModal(loginModal); 
+            else window.openAuthModal();
+            return; 
+        }
         switchView('profile-view');
         renderProfileData();
     }

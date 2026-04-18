@@ -63,7 +63,7 @@
 
                     <!-- Logged Out State -->
                     <div id="user-logged-out" style="display: flex; align-items: center; gap: 0.5rem; color: var(--sporpuan-navy); font-weight: 700; cursor: pointer;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="desktop-only" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
@@ -144,7 +144,7 @@
         <div class="mm-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3rem;">
             <div class="logo">
                 <img src="sporpuan_logo_new.png" alt="Sporpuan Logo" style="height:44px;">
-                <div class="logo-text" style="color:#fff; font-size:1.5rem;">spor<strong>puan</strong></div>
+                <div class="logo-text" style="color:#fff; font-size:1.5rem;">spor<strong style="color:var(--sporpuan-green);">puan</strong></div>
             </div>
             <button id="mm-close-btn" style="background:none; border:none; color:#fff; font-size:2.5rem; cursor:pointer; line-height:1;">✕</button>
         </div>
@@ -159,7 +159,7 @@
                 <button class="primary-btn" onclick="openAuthModal(); hideMobileMenu();" style="font-size:1.2rem; padding:1.2rem;">Giriş Yap / Üye Ol</button>
             </div>
             <div id="mm-logged-in" style="display:none;">
-                <a href="#" onclick="switchView('profile'); hideMobileMenu();" style="color:var(--sporpuan-green); font-size:1.6rem; text-decoration:none; font-weight:700;">Profilim</a>
+                <a href="#" onclick="window.showProfile(); hideMobileMenu();" style="color:var(--sporpuan-green); font-size:1.6rem; text-decoration:none; font-weight:700;">Profilim</a>
                 <a href="#" id="mm-logout-btn" style="color:#ef4444; font-size:1.6rem; text-decoration:none; font-weight:700; margin-top:1rem;">Çıkış Yap</a>
             </div>
         </div>
